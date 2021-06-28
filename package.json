@@ -6,7 +6,7 @@
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf dist && tsc && rollup -c"
+    "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts"
   },
   "files": [
     "dist/*"
@@ -32,5 +32,8 @@
   "bin": {
     "sync": "dist/sync.js"
   },
-  "repository": "https://gitlab.com/LuisDanilo/scalars-cli"
+  "repository": "https://gitlab.com/LuisDanilo/scalars-cli",
+  "dependencies": {
+    "@graphql-codegen/cli": "^1.21.5"
+  }
 }
