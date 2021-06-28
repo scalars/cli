@@ -22,7 +22,8 @@ export default [
 
             },
         ],
-        plugins: [typescript()]
+        plugins: [typescript()],
+        external: ['dotenv']
     },
     {
         input: './dist/dts/index.d.ts',
