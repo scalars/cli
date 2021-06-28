@@ -31,5 +31,6 @@
   },
   "bin": {
     "sync": "dist/sync.js"
-  }
+  },
+  "repository": "https://gitlab.com/LuisDanilo/scalars-cli"
 }
