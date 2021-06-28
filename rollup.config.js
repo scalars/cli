@@ -18,7 +18,7 @@ export default [
             {
                 file: 'dist/sync.js',
                 format: 'es',
-                banner: '#!/usr/bin/node env'
+                banner: '#!/usr/bin/env node'
 
             },
         ],
