@@ -1,5 +1,7 @@
 import { introspect } from '../utils/introspect'
+import { config } from 'dotenv'
 
+config()
 const endpoint: string = process.env.SCALARS_API || process.env.SCALARS_ENDPOINT || ''
 const clientId: string = process.env.SCALARS_CLIENT_ID || ''
 
