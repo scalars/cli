@@ -1,6 +1,6 @@
 {
   "name": "@juaji/scalars-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Client for scalars APIs",
   "main": "dist/index.js",
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
@@ -9,9 +9,9 @@
     "build": "rimraf dist && tsc && rollup -c"
   },
   "files": [
-    "./dist/**/*"
+    "dist/*"
   ],
-  "types": "./dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "keywords": [
     "scalars",
     "sdk",
