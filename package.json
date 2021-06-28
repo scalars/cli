@@ -4,5 +4,9 @@
   "description": "Client for scalars APIs",
   "main": "dist/index.js",
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^2.52.3",
+    "typescript": "^4.3.4"
+  }
 }
