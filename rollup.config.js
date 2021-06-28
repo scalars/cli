@@ -17,7 +17,9 @@ export default [
         output: [
             {
                 file: 'dist/sync.js',
-                format: 'es'
+                format: 'es',
+                banner: '#!/usr/bin/node env'
+
             },
         ],
         plugins: [typescript()]

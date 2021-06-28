@@ -1,4 +1,3 @@
-#!/usr/bin/node env
 import { introspect } from '../utils/introspect'
 
 const endpoint: string = process.env.SCALARS_API || process.env.SCALARS_ENDPOINT || ''
