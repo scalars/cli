@@ -1,3 +1,3 @@
-export const greeting = (name: string):void => {
-    console.log(`Hola ${name}`)
+export const greeting = ( name: string ):void => {
+    console.log( `Hola ${name}` )
 }
