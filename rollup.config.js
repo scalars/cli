@@ -1,5 +1,6 @@
 import typescript from '@rollup/plugin-typescript'
 import dts from 'rollup-plugin-dts'
+// import nodePolyfills from 'rollup-plugin-node-polyfills'
 
 export default [
     {
@@ -17,17 +18,18 @@ export default [
         output: [
             {
                 file: 'dist/sync.js',
-                format: 'umd',
+                format: 'commonjs',
                 banner: '#!/usr/bin/env node',
-                name: 'sync',
-                globals: {
-                    dotenv: 'dotenv'
-                }
+                // name: 'sync',
+                // globals: {
+                //     dotenv: 'dotenv',
+                //     path: 'path'
+                // }
 
             },
         ],
         plugins: [typescript()],
-        external: ['dotenv']
+        external: ['dotenv', 'path']
     },
     {
         input: './dist/dts/index.d.ts',
