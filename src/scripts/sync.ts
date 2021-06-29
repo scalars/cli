@@ -30,14 +30,13 @@ if ( !clientId )
 
 introspect( { endpoint, clientId } ).then( () => {
     console.log( `Introspection completed!!` )
-    console.log( endpoint )
-    console.log( clientId )
     console.log( `
         Thanks for using scalars client!
-        Now you are available to use ScalarsClient!
-        Ensure to create a client at the scalars console to start to use your API!
-        On your code you need to create an instance of the client like this:
-        const client = new ScalarsClient()
-        Happy codding!!Your friendly neighbors Luis Danilo JG and Madrov team ❤️
+            Now you are available to use ScalarsClient!
+            On your code you need to create an instance of the client like this:
+            
+            const client = new ScalarsClient()
+            
+            Happy codding!!Your friendly neighbors Luis Danilo JG and Madrov team ❤️
     ` )
 } )
