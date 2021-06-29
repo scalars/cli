@@ -3,9 +3,11 @@ import { config } from 'dotenv'
 import { join } from 'path'
 
 config( {
-    path: join( __dirname, '..', '.env.dev' )
+    path: join( __dirname, '..', '..', '.env.dev' )
 } )
 console.log( process.env )
+console.log( 'cwd', process.cwd() )
+console.log( '__dirname', __dirname )
 const endpoint: string = process.env.SCALARS_API || process.env.SCALARS_ENDPOINT || ''
 const clientId: string = process.env.SCALARS_CLIENT_ID || ''
 
