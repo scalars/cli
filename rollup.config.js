@@ -17,8 +17,12 @@ export default [
         output: [
             {
                 file: 'dist/sync.js',
-                format: 'es',
-                banner: '#!/usr/bin/env node'
+                format: 'umd',
+                banner: '#!/usr/bin/env node',
+                name: 'sync',
+                globals: {
+                    dotenv: 'dotenv'
+                }
 
             },
         ],
