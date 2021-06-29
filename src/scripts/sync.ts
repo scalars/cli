@@ -1,10 +1,11 @@
 import { introspect } from '../utils/introspect'
 import { config } from 'dotenv'
+import { join } from 'path'
 
-console.log( __dirname )
 config( {
-    path: '.env.dev'
+    path: join( __dirname, '..', '.env.dev' )
 } )
+console.log( process.env )
 const endpoint: string = process.env.SCALARS_API || process.env.SCALARS_ENDPOINT || ''
 const clientId: string = process.env.SCALARS_CLIENT_ID || ''
 
