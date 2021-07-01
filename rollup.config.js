@@ -1,5 +1,6 @@
 import typescript from '@rollup/plugin-typescript'
 import dts from 'rollup-plugin-dts'
+import { terser } from 'rollup-plugin-terser'
 
 export default [
     {
@@ -10,7 +11,7 @@ export default [
                 format: 'es'
             }
         ],
-        plugins: [typescript()]
+        plugins: [typescript(), terser()]
     },
     {
         input: 'src/scripts/sync.ts',
@@ -21,8 +22,8 @@ export default [
                 banner: '#!/usr/bin/env node',
             },
         ],
-        plugins: [typescript()],
-        external: ['dotenv', 'path', '@graphql-codegen/cli']
+        plugins: [typescript(), terser()],
+        external: ['dotenv', 'path', '@graphql-codegen/cli', 'fs']
     },
     {
         input: './dist/dts/index.d.ts',

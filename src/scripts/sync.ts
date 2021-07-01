@@ -1,4 +1,7 @@
 import { introspect } from '../utils/introspect'
+// import axios, { AxiosError } from 'axios'
+// import { print } from 'graphql'
+import { gql } from 'graphql-tag'
 // import { config } from 'dotenv'
 // import { join } from 'path'
 
@@ -30,15 +33,50 @@ const clientId: string = '1dc47a10-af42-11eb-8847-b1b62795d90c'
 //              as SCALARS_CLIENT_ID
 //     ` )
 
+// const operation = gql`
+//     query getProfile($where: ProfileWhereUniqueInput!) {
+//         profile(where: $where ) {
+//             id
+//         }
+//     }
+// `
+
+// axios
+//     .post(
+//         'https://app.scalars.co/rfand82vt2/api',
+//         {
+//             query: print( operation ),
+//             variables: {
+//                 where: {
+//                     email: 'luis@madrov.com'
+//                 }
+//             }
+//         },
+//         {
+//             headers: {
+//                 'Authorization': `client_id ${clientId}`
+//             }
+//         }
+//     )
+//     .then( res => console.log( Object.keys( res ) ) )
+//     .catch( ( err: Error | AxiosError ) => {
+//         if ( axios.isAxiosError( err ) ) {
+//             console.log( 'AXIOS ERROR' )
+//             console.log( 'The error: ', err.response )
+//         }
+//         else {
+//             console.log( 'STOCK ERROR' )
+//             console.log()
+//         }
+//     } )
+
 introspect( { endpoint, clientId } ).then( () => {
-    console.log( `Introspection completed!!` )
     console.log( `
+    Introspection completed!!
         Thanks for using scalars client!
-            Now you are available to use ScalarsClient!
-            On your code you need to create an instance of the client like this:
-            
+        On your code you need to create an instance of the client like this:
             const client = new ScalarsClient()
-            
-            Happy codding!!Your friendly neighbors Luis Danilo JG and Madrov team ❤️
+        Happy codding!!
+        Your friendly neighbors Luis Danilo JG and Madrov team ❤️
     ` )
 } )

@@ -1,0 +1,158 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import {
+{{#imports}}
+    {{.}},
+{{/imports}}
+} from '../types'
+
+import axios, { AxiosError } from 'axios'
+import { DocumentNode, print } from 'graphql'
+import { gql } from 'graphql-tag'
+
+{{#selects}}
+export type {{name}} = {
+    {{#fields}}
+    {{name}}?: {{type}}
+    {{/fields}}
+}
+{{/selects}}
+
+const parseSelectFields = ( select: Record<string ,any> ): string => {
+    let fields: string = ''
+    Object.keys( select ).forEach( key => {
+        if ( typeof select[key] === 'boolean' ) {
+            fields = fields.concat( `${key} ` )
+        }
+        else {
+            fields = fields.concat( `${key} { ${parseSelectFields( select[key] )}} ` )
+        }
+    } )
+    return fields
+}
+
+const fillSelectedFields = ( operation: string, select: Record<string, any> ): DocumentNode => {
+    return gql`${operation.replace( '#@@', parseSelectFields( select ) )}`
+}
+
+abstract class Service {
+    protected _doQuery = ( query: DocumentNode, args: Record<string, any> ) => {
+        console.log( `Doing query` )
+        console.log( query )
+    }
+    protected doQuery = async ( query: DocumentNode, args: Record<string, any> ) => {
+        try {
+            const response = await axios.post(
+                {{#config}}'{{{endpoint}}}'{{/config}},
+                {
+                    query: print( query ),
+                    variables: args
+                },
+                {
+                    headers: {
+                        'Authorization': 'client_id {{#config}}{{clientId}}{{/config}}'
+                    }
+                }
+            )
+            console.log( response.data.data )
+        }
+        catch ( err: unknown ) {
+            if ( axios.isAxiosError( err ) ) {
+                console.log( `AXIOS ERROR` )
+            }
+            else {
+                console.log( `STOCK ERROR` )
+            }
+        }
+    }
+    protected doMutation = ( mutation: DocumentNode, args: Record<string, any> ) => {
+        console.log( 'Doing mutation...' )
+        console.log( mutation )
+    }
+}
+
+export class QueriesService extends Service {
+    {{#operations}}
+    {{#queries}}
+    get{{_operation}} (
+        select: {{#select}}{{name}}{{/select}},
+        {{#args}}
+        {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
+        {{/args}}
+    ): {{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}} | void {
+        const get{{_operation}}Query: string = `
+            query get{{_operation}} (
+            {{#args}}
+                ${{name}}: {{#scalarType}}{{.}}{{/scalarType}}{{^scalarType}}{{{type}}}{{/scalarType}}{{#requiredType}}!{{/requiredType}},
+            {{/args}}
+            ) {
+                {{operation}} (
+                    {{#args}}
+                    {{name}}: ${{name}},
+                    {{/args}}
+                ) {
+                    #@@
+                }
+            }
+        `
+        this.doQuery( fillSelectedFields( get{{_operation}}Query, select ), {
+            {{#args}}
+            {{name}},
+            {{/args}}
+        } )
+    }
+    {{/queries}}
+    {{/operations}}
+}
+
+export class MutationsService extends Service {
+    {{#operations}}
+    {{#mutations}}
+    {{_operation}} (
+        select: {{#select}}{{name}}{{/select}},
+        {{#args}}
+        {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
+        {{/args}}
+    ): {{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}} | void {
+        const {{_operation}}Mutation: string = `
+            mutation {{_operation}} (
+            {{#args}}
+                ${{name}}: {{#scalarType}}{{.}}{{/scalarType}}{{^scalarType}}{{{type}}}{{/scalarType}}{{#requiredType}}!{{/requiredType}},
+            {{/args}}
+            ) {
+                {{operation}} (
+                {{#args}}
+                    {{name}}: ${{name}},
+                {{/args}}
+                ) {
+                    #@@
+                }
+            }
+        `
+        this.doMutation( fillSelectedFields( {{_operation}}Mutation, select ), {
+            {{#args}}
+            {{name}},
+            {{/args}}
+        } )
+    }
+    {{/mutations}}
+    {{/operations}}
+}
+
+export class ScalarsClient {
+    private readonly queriesService: QueriesService
+    private readonly mutationsService: MutationsService
+
+    constructor() {
+        this.queriesService = new QueriesService()
+        this.mutationsService = new MutationsService()
+    }
+
+    get queries () {
+        return this.queriesService
+    }
+
+    get mutations () {
+        return this.mutationsService
+    }
+}
