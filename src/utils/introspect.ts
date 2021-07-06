@@ -1,11 +1,43 @@
 import { generate } from '@graphql-codegen/cli'
-import { ScalarsClientConfig } from './interfaces'
 import { join } from 'path'
-import { writeFileSync, mkdir, readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { render } from 'mustache'
+import { ModuleFormat, rollup, RollupOptions } from 'rollup'
+// import virtual from '@rollup/plugin-virtual'
+import { ScalarsClientConfig } from './interfaces'
+import typescript from '@rollup/plugin-typescript'
+import { terser } from 'rollup-plugin-terser'
+import ts, { CompilerHost, CompilerOptions, Program } from 'typescript'
 
-const importedTypes: Set<string> = new Set()
 const selectTypes: Array<Record<string, any>> = []
+
+const compile = ( fileNames: Array<string>, options: CompilerOptions ): void => {
+    const createdFiles: Record<string, any> = {}
+    const host: CompilerHost = ts.createCompilerHost( options )
+    host.writeFile = ( fileName: string, contents: string ) => createdFiles[fileName] = contents
+    const program: Program = ts.createProgram( fileNames, options, host )
+    program.emit()
+    fileNames.forEach( file => {
+        const dts = file.replace( '.ts', '.d.ts' )
+        writeFileSync( dts, createdFiles[dts] )
+    } )
+}
+
+/**
+ * This function generates types by introspecting the API
+ * @param scalarsApi Endpoint of API to introspect
+ */
+const generateTypedSchema = async ( scalarsApi: string ): Promise<string> => {
+    const { '0': { content } } = await generate( {
+        generates: {
+            [join( __dirname, 'newTypes.ts' )]: {
+                schema: scalarsApi,
+                plugins: ['typescript', 'typescript-operations'],
+            }
+        }
+    }, false )
+    return content
+}
 
 /**
  * This function build main file of this package (index.js) adding to Scalars Client new services
@@ -13,30 +45,94 @@ const selectTypes: Array<Record<string, any>> = []
  * fields that can be queried/are attached to each one.
  * @param config Client configuration (endpoint and client id)
  */
-const updateScalarsClient = ( operations: Record<string, any>, config: ScalarsClientConfig ): void => {
-    mkdir(
-        join( __dirname, 'holo' ),
-        { recursive: true },
-        ( err: unknown ) => {
-            if ( err )
-                throw err
-            const template: string = readFileSync(
-                // join( __dirname, 'templates', 'template.mustache' ) TODO Uncomment this at npm publish
-                join( __dirname, '..', 'templates', 'template.mustache' )
-            ).toString()
-            // console.log( JSON.stringify( { operations, imports: Array.from( importedTypes ), selects: Array.from( selectTypes ) } ) )
-            writeFileSync(
-                join( __dirname, 'holo', 'newIndex.ts' ),
-                render( template, {
-                    operations,
-                    imports: Array.from( importedTypes ),
-                    selects: Array.from( selectTypes ),
-                    config
-                } )
-            )
-        }
+const updateScalarsClient = async ( operations: Record<string, any>, config: ScalarsClientConfig ): Promise<void> => {
+    // mkdir(
+    //     join( __dirname, 'holo' ),
+    //     { recursive: true },
+    //     ( err: unknown ) => {
+    //         if ( err )
+    //             throw err
+    //         const template: string = readFileSync(
+    //             // join( __dirname, 'templates', 'template.mustache' ) TODO Uncomment this at npm publish
+    //             join( __dirname, '..', 'templates', 'template.mustache' )
+    //         ).toString()
+    //         writeFileSync(
+    //             join( __dirname, 'holo', 'newIndex.ts' ),
+    //             render( template, {
+    //                 operations,
+    //                 imports: Array.from( importedTypes ),
+    //                 selects: Array.from( selectTypes ),
+    //                 config
+    //             } )
+    //         )
+    //     }
+    // )
+    // const schemaTypes = await generateTypedSchema( config.endpoint )
+    // const rendered: string = schemaTypes
+    // console.log( rendered )
+    // const virtualEntry = virtual( {
+    //     entry: `export const n: number = 32;`
+    // } )
+    // const inputOptions: RollupOptions = {
+    //     input: 'entry',
+    //     plugins: [ virtualEntry as Plugin, typescript( { module: 'EsNext' } ), terser() ]
+    // }
+    // const outputOptions = {
+    //     file: join( __dirname, 'newIndex.js' ),
+    //     format: 'es' as ModuleFormat,
+    // }
+    // const bundle = await rollup( inputOptions )
+    // await bundle.write( outputOptions )
+    // await bundle.close()
+    const template: string = readFileSync(
+        join( __dirname, 'template.mustache' )
+    ).toString()
+    // const volume = Volume.fromJSON( {
+    //     '/virtualIndex.ts': render( template, {
+    //         operations,
+    //         imports: Array.from( importedTypes ),
+    //         selects: Array.from( selectTypes ),
+    //         config
+    //     } ),
+    //     '/testo.ts': 'export interface foo { id: number }'
+    // } )
+    // const memfs: FS = createFs( volume ) as FS
+    const schemaTypes = await generateTypedSchema( config.endpoint )
+    writeFileSync(
+        join( __dirname, '_index.ts' ),
+        render( template, {
+            operations,
+            newTypes: schemaTypes,
+            selects: Array.from( selectTypes ),
+            config
+        } )
     )
-
+    const inputOptions: RollupOptions = {
+        // input: '/testo.ts',
+        input: join( __dirname, 'index.ts' ),
+        plugins: [
+            typescript( { module: 'esnext' } ),
+            terser(),
+            // memfsPlugin( memfs ),
+        ],
+        external: ['axios', 'graphql', 'graphql-tag']
+    }
+    const outputOptions = {
+        file: join( __dirname, 'index.js' ),
+        format: 'es' as ModuleFormat,
+    }
+    try {
+        compile( [join( __dirname, 'index.ts' )], {
+            declaration: true,
+            emitDeclarationOnly: true
+        } )
+        const bundle = await rollup( inputOptions )
+        await bundle.write( outputOptions )
+        await bundle.close()
+    }
+    catch ( e ) {
+        console.log( e )
+    }
 }
 
 /**
@@ -101,7 +197,6 @@ const getOperationReturnType = ( type: Record<string, any>, required: boolean = 
             type: name,
             requiredType: required,
         }
-        importedTypes.add( name )
     }
     return result
 }
@@ -124,7 +219,6 @@ const getOperationArgType = ( arg: Record<string, any>, required: boolean = fals
             type: name,
             requiredType: required
         }
-        importedTypes.add( name )
     }
     if ( /SCALAR/gm.test( kind ) ) {
         result = {
@@ -133,7 +227,6 @@ const getOperationArgType = ( arg: Record<string, any>, required: boolean = fals
             scalarType: name,
             requiredType: required
         }
-        importedTypes.add( `Scalars` )
     }
     return result
 }
@@ -264,27 +357,11 @@ const getIntrospectionFilteredByObjects = async ( scalarsApi: string ): Promise<
 }
 
 /**
- * This function generates types by introspecting the API
- * @param scalarsApi Endpoint of API to introspect
- */
-const generateTypedSchema = async ( scalarsApi: string ): Promise<void> => {
-    await generate( {
-        generates: {
-            [join( __dirname, 'types.ts' )]: {
-                schema: scalarsApi,
-                plugins: ['typescript', 'typescript-operations'],
-            }
-        }
-    }, true )
-}
-
-/**
  * This function starts the entire process of introspection and creation
  * of queries and mutations offered by the scalars API
  */
 export const introspect = async ( config: ScalarsClientConfig ): Promise<void> => {
-    await generateTypedSchema( config.endpoint )
     const objects = await getIntrospectionFilteredByObjects( config.endpoint )
     const operations: Record<string, any> = getServicesByOperations( objects )
-    updateScalarsClient( operations, config )
+    await updateScalarsClient( operations, config )
 }

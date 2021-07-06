@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import {
-{{#imports}}
-    {{.}},
-{{/imports}}
-} from '../types'
+//import {
+//{{#imports}}
+//    {{.}},
+//{{/imports}}
+//} from '../types'
+
+{{#newTypes}}
+{{{.}}}
+{{/newTypes}}
 
 import axios, { AxiosError } from 'axios'
 import { DocumentNode, print } from 'graphql'
@@ -36,11 +40,9 @@ const fillSelectedFields = ( operation: string, select: Record<string, any> ): D
 }
 
 abstract class Service {
-    protected _doQuery = ( query: DocumentNode, args: Record<string, any> ) => {
-        console.log( `Doing query` )
-        console.log( query )
-    }
     protected doQuery = async ( query: DocumentNode, args: Record<string, any> ) => {
+        console.log( `Doing query` )
+        console.log( JSON.stringify( query ) )
         try {
             const response = await axios.post(
                 {{#config}}'{{{endpoint}}}'{{/config}},
