@@ -70,7 +70,7 @@ abstract class Service {
 export class QueriesService extends Service {
     {{#operations}}
     {{#queries}}
-    get{{_operation}} (
+    {{_operation}} (
         select: {{#select}}{{name}}{{/select}},
         {{#args}}
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
@@ -110,7 +110,7 @@ export class MutationsService extends Service {
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
         {{/args}}
     ): {{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}} | void {
-        const {{_operation}}Mutation: string = `
+        const {{operation}}Mutation: string = `
             mutation {{_operation}} (
             {{#args}}
                 ${{name}}: {{#scalarType}}{{.}}{{/scalarType}}{{^scalarType}}{{{type}}}{{/scalarType}}{{#requiredType}}!{{/requiredType}},
@@ -144,11 +144,11 @@ export class ScalarsClient {
         this.mutationsService = new MutationsService()
     }
 
-    get queries () {
+    get query () {
         return this.queriesService
     }
 
-    get mutations () {
+    get mutation () {
         return this.mutationsService
     }
 }
