@@ -111,8 +111,17 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         // input: '/testo.ts',
         input: join( __dirname, 'index.ts' ),
         plugins: [
-            typescript( { module: 'esnext' } ),
-            terser(),
+            typescript( {
+                'target': 'es2018',
+                'module': 'ESNext',
+                'moduleResolution': 'node',
+                'strict': true,
+                'esModuleInterop': true,
+                'skipLibCheck': true,
+                'forceConsistentCasingInFileNames': true,
+                'outDir': __dirname,
+            } )
+            // terser(),
             // memfsPlugin( memfs ),
         ],
         external: ['axios', 'graphql', 'graphql-tag']
@@ -126,9 +135,9 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             declaration: true,
             emitDeclarationOnly: true
         } )
-        const bundle = await rollup( inputOptions )
-        await bundle.write( outputOptions )
-        await bundle.close()
+        // const bundle = await rollup( inputOptions )
+        // await bundle.write( outputOptions )
+        // await bundle.close()
     }
     catch ( e ) {
         console.log( e )
