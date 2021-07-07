@@ -6,7 +6,7 @@
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && cp src/utils/template.mustache dist/template.mustache",
+    "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && cp src/utils/template.mustache dist/template.mustache"
   },
   "files": [
     "dist"
