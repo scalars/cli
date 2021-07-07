@@ -34,7 +34,7 @@ const fillSelectedFields = ( operation: string, select: Record<string, any> ): D
 }
 
 class Service {
-    doQuery = async ( query: DocumentNode, args: Record<string, any> ) => {
+    doQuery = async ( query: DocumentNode, args: Record<string, any> ): Promise<any> => {
         try {
             const response = await axios.post(
                 {{#config}}'{{{endpoint}}}'{{/config}},
@@ -48,8 +48,7 @@ class Service {
                     }
                 }
             )
-            // TODO Return object
-            console.log( response.data.data )
+            return response.data.data
         }
         catch ( err: unknown ) {
             if ( axios.isAxiosError( err ) ) {
@@ -69,12 +68,12 @@ class Service {
 class QueriesService extends Service {
     {{#operations}}
     {{#queries}}
-    {{operation}} (
+    async {{operation}} (
         select: {{#select}}{{name}}{{/select}},
         {{#args}}
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
         {{/args}}
-    ): {{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}} | void {
+    ): Promise<{{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
         const get{{_operation}}Query: string = `
             query get{{_operation}} (
             {{#args}}
@@ -90,11 +89,12 @@ class QueriesService extends Service {
                 }
             }
         `
-        this.doQuery( fillSelectedFields( get{{_operation}}Query, select ), {
+        const response = await this.doQuery( fillSelectedFields( get{{_operation}}Query, select ), {
             {{#args}}
             {{name}},
             {{/args}}
         } )
+        return response['{{operation}}']
     }
     {{/queries}}
     {{/operations}}
