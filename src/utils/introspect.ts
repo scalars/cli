@@ -5,6 +5,7 @@ import { render } from 'mustache'
 import { ScalarsClientConfig } from './interfaces'
 import ts, { CompilerHost, CompilerOptions, ModuleKind, ModuleResolutionKind, Program, ScriptTarget } from 'typescript'
 
+
 const selectTypes: Array<Record<string, any>> = []
 
 const compile = ( fileNames: Array<string>, options: CompilerOptions ): void => {
