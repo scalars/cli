@@ -2,10 +2,8 @@ import { generate } from '@graphql-codegen/cli'
 import { join } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 import { render } from 'mustache'
-import { ModuleFormat, rollup, RollupOptions } from 'rollup'
 import { ScalarsClientConfig } from './interfaces'
 import ts, { CompilerHost, CompilerOptions, ModuleKind, ModuleResolutionKind, Program, ScriptTarget } from 'typescript'
-import { terser } from 'rollup-plugin-terser'
 
 const selectTypes: Array<Record<string, any>> = []
 
@@ -15,9 +13,7 @@ const compile = ( fileNames: Array<string>, options: CompilerOptions ): void => 
     host.writeFile = ( fileName: string, contents: string ) => createdFiles[fileName] = contents
     const program: Program = ts.createProgram( fileNames, options, host )
     program.emit()
-    // console.log( Object.keys( createdFiles ) )
     fileNames.forEach( file => {
-        // console.log( file )
         const js = file.replace( '.ts', '.js' )
         const dts = file.replace( '.ts', '.d.ts' )
         writeFileSync( dts, createdFiles[dts] )
@@ -51,16 +47,6 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
     const template: string = readFileSync(
         join( __dirname, 'template.mustache' )
     ).toString()
-    // const volume = Volume.fromJSON( {
-    //     '/virtualIndex.ts': render( template, {
-    //         operations,
-    //         imports: Array.from( importedTypes ),
-    //         selects: Array.from( selectTypes ),
-    //         config
-    //     } ),
-    //     '/testo.ts': 'export interface foo { id: number }'
-    // } )
-    // const memfs: FS = createFs( volume ) as FS
     const schemaTypes = await generateTypedSchema( config.endpoint )
     writeFileSync(
         join( __dirname, 'index.ts' ),
@@ -71,17 +57,6 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             config
         } )
     )
-    // const inputOptions: RollupOptions = {
-    //     input: join( __dirname, 'index.js' ),
-    //     plugins: [
-    //         terser()
-    //     ],
-    //     external: ['axios', 'graphql', 'graphql-tag']
-    // }
-    // const outputOptions = {
-    //     file: join( __dirname, 'index.min.js' ),
-    //     format: 'es' as ModuleFormat,
-    // }
     try {
         compile( [join( __dirname, 'index.ts' )], {
             declaration: true,
@@ -95,9 +70,6 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             'forceConsistentCasingInFileNames': true,
             'outDir': __dirname,
         } )
-        // const bundle = await rollup( inputOptions )
-        // await bundle.write( outputOptions )
-        // await bundle.close()
     }
     catch ( e ) {
         console.log( e )
