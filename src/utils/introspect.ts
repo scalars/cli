@@ -2,12 +2,11 @@ import { generate } from '@graphql-codegen/cli'
 import { join } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 import { render } from 'mustache'
-import { ModuleFormat, rollup, RollupOptions } from 'rollup'
+import { ModuleFormat, RollupOptions } from 'rollup'
 // import virtual from '@rollup/plugin-virtual'
 import { ScalarsClientConfig } from './interfaces'
 import typescript from '@rollup/plugin-typescript'
-import { terser } from 'rollup-plugin-terser'
-import ts, { CompilerHost, CompilerOptions, Program } from 'typescript'
+import ts, { CompilerHost, CompilerOptions, ModuleKind, ModuleResolutionKind, Program, ScriptTarget } from 'typescript'
 
 const selectTypes: Array<Record<string, any>> = []
 
@@ -133,7 +132,15 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
     try {
         compile( [join( __dirname, 'index.ts' )], {
             declaration: true,
-            emitDeclarationOnly: true
+            emitDeclarationOnly: false,
+            'target': ScriptTarget.ES2018,
+            'module': ModuleKind.ESNext,
+            'moduleResolution': ModuleResolutionKind.NodeJs,
+            'strict': true,
+            'esModuleInterop': true,
+            'skipLibCheck': true,
+            'forceConsistentCasingInFileNames': true,
+            'outDir': __dirname,
         } )
         // const bundle = await rollup( inputOptions )
         // await bundle.write( outputOptions )

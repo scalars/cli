@@ -2,14 +2,11 @@
   "name": "@juaji/scalars-cli",
   "version": "0.0.21",
   "description": "Client for scalars APIs",
-  "main": "dist/index.js",
+  "main": "dist/index.ts",
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "tempo": "ts-node src/utils/holo/tempo.ts",
-    "dev": "ts-node src/scripts/sync.ts",
     "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && cp src/utils/template.mustache dist/template.mustache",
-    "patch": "npm version patch"
   },
   "files": [
     "dist"
