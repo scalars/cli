@@ -2,7 +2,7 @@
   "name": "@juaji/scalars-cli",
   "version": "0.0.22",
   "description": "Client for scalars APIs",
-  "main": "dist/index.ts",
+  "main": "dist/index.js",
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
   "license": "MIT",
   "scripts": {

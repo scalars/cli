@@ -35,8 +35,8 @@ const fillSelectedFields = ( operation: string, select: Record<string, any> ): D
 
 abstract class Service {
     protected doQuery = async ( query: DocumentNode, args: Record<string, any> ) => {
-        console.log( `Doing query` )
-        console.log( JSON.stringify( query ) )
+        // console.log( `Doing query` )
+        // console.log( JSON.stringify( query ) )
         try {
             const response = await axios.post(
                 {{#config}}'{{{endpoint}}}'{{/config}},

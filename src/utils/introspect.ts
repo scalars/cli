@@ -2,11 +2,10 @@ import { generate } from '@graphql-codegen/cli'
 import { join } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 import { render } from 'mustache'
-import { ModuleFormat, RollupOptions } from 'rollup'
-// import virtual from '@rollup/plugin-virtual'
+import { ModuleFormat, rollup, RollupOptions } from 'rollup'
 import { ScalarsClientConfig } from './interfaces'
-import typescript from '@rollup/plugin-typescript'
 import ts, { CompilerHost, CompilerOptions, ModuleKind, ModuleResolutionKind, Program, ScriptTarget } from 'typescript'
+import { terser } from 'rollup-plugin-terser'
 
 const selectTypes: Array<Record<string, any>> = []
 
@@ -16,9 +15,13 @@ const compile = ( fileNames: Array<string>, options: CompilerOptions ): void => 
     host.writeFile = ( fileName: string, contents: string ) => createdFiles[fileName] = contents
     const program: Program = ts.createProgram( fileNames, options, host )
     program.emit()
+    // console.log( Object.keys( createdFiles ) )
     fileNames.forEach( file => {
+        // console.log( file )
+        const js = file.replace( '.ts', '.js' )
         const dts = file.replace( '.ts', '.d.ts' )
         writeFileSync( dts, createdFiles[dts] )
+        writeFileSync( js, createdFiles[js] )
     } )
 }
 
@@ -106,29 +109,17 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             config
         } )
     )
-    const inputOptions: RollupOptions = {
-        // input: '/testo.ts',
-        input: join( __dirname, 'index.ts' ),
-        plugins: [
-            typescript( {
-                'target': 'es2018',
-                'module': 'ESNext',
-                'moduleResolution': 'node',
-                'strict': true,
-                'esModuleInterop': true,
-                'skipLibCheck': true,
-                'forceConsistentCasingInFileNames': true,
-                'outDir': __dirname,
-            } )
-            // terser(),
-            // memfsPlugin( memfs ),
-        ],
-        external: ['axios', 'graphql', 'graphql-tag']
-    }
-    const outputOptions = {
-        file: join( __dirname, 'index.js' ),
-        format: 'es' as ModuleFormat,
-    }
+    // const inputOptions: RollupOptions = {
+    //     input: join( __dirname, 'index.js' ),
+    //     plugins: [
+    //         terser()
+    //     ],
+    //     external: ['axios', 'graphql', 'graphql-tag']
+    // }
+    // const outputOptions = {
+    //     file: join( __dirname, 'index.min.js' ),
+    //     format: 'es' as ModuleFormat,
+    // }
     try {
         compile( [join( __dirname, 'index.ts' )], {
             declaration: true,
