@@ -33,10 +33,8 @@ const fillSelectedFields = ( operation: string, select: Record<string, any> ): D
     return gql`${operation.replace( '#@@', parseSelectFields( select ) )}`
 }
 
-abstract class Service {
-    protected doQuery = async ( query: DocumentNode, args: Record<string, any> ) => {
-        // console.log( `Doing query` )
-        // console.log( JSON.stringify( query ) )
+class Service {
+    doQuery = async ( query: DocumentNode, args: Record<string, any> ) => {
         try {
             const response = await axios.post(
                 {{#config}}'{{{endpoint}}}'{{/config}},
@@ -50,6 +48,7 @@ abstract class Service {
                     }
                 }
             )
+            // TODO Return object
             console.log( response.data.data )
         }
         catch ( err: unknown ) {
@@ -61,16 +60,16 @@ abstract class Service {
             }
         }
     }
-    protected doMutation = ( mutation: DocumentNode, args: Record<string, any> ) => {
+    doMutation = ( mutation: DocumentNode, args: Record<string, any> ) => {
         console.log( 'Doing mutation...' )
         console.log( mutation )
     }
 }
 
-export class QueriesService extends Service {
+class QueriesService extends Service {
     {{#operations}}
     {{#queries}}
-    {{_operation}} (
+    {{operation}} (
         select: {{#select}}{{name}}{{/select}},
         {{#args}}
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
@@ -101,16 +100,16 @@ export class QueriesService extends Service {
     {{/operations}}
 }
 
-export class MutationsService extends Service {
+class MutationsService extends Service {
     {{#operations}}
     {{#mutations}}
-    {{_operation}} (
+    {{operation}} (
         select: {{#select}}{{name}}{{/select}},
         {{#args}}
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
         {{/args}}
     ): {{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}} | void {
-        const {{operation}}Mutation: string = `
+        const {{_operation}}Mutation: string = `
             mutation {{_operation}} (
             {{#args}}
                 ${{name}}: {{#scalarType}}{{.}}{{/scalarType}}{{^scalarType}}{{{type}}}{{/scalarType}}{{#requiredType}}!{{/requiredType}},
@@ -138,10 +137,12 @@ export class MutationsService extends Service {
 export class ScalarsClient {
     private readonly queriesService: QueriesService
     private readonly mutationsService: MutationsService
+    private readonly genericService: Service
 
     constructor() {
         this.queriesService = new QueriesService()
         this.mutationsService = new MutationsService()
+        this.genericService = new Service()
     }
 
     get query () {
@@ -150,5 +151,13 @@ export class ScalarsClient {
 
     get mutation () {
         return this.mutationsService
+    }
+
+    async doQuery ( query: string, variables: Record<string, any> ): Promise<any> {
+        return await this.genericService.doQuery( gql`${query}`, variables )
+    }
+
+    async doMutation ( mutation: string, variables: Record<string, any> ): Promise<any> {
+        return await this.genericService.doMutation( gql`${mutation}`, variables )
     }
 }
