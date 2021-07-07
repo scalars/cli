@@ -48,44 +48,6 @@ const generateTypedSchema = async ( scalarsApi: string ): Promise<string> => {
  * @param config Client configuration (endpoint and client id)
  */
 const updateScalarsClient = async ( operations: Record<string, any>, config: ScalarsClientConfig ): Promise<void> => {
-    // mkdir(
-    //     join( __dirname, 'holo' ),
-    //     { recursive: true },
-    //     ( err: unknown ) => {
-    //         if ( err )
-    //             throw err
-    //         const template: string = readFileSync(
-    //             // join( __dirname, 'templates', 'template.mustache' ) TODO Uncomment this at npm publish
-    //             join( __dirname, '..', 'templates', 'template.mustache' )
-    //         ).toString()
-    //         writeFileSync(
-    //             join( __dirname, 'holo', 'newIndex.ts' ),
-    //             render( template, {
-    //                 operations,
-    //                 imports: Array.from( importedTypes ),
-    //                 selects: Array.from( selectTypes ),
-    //                 config
-    //             } )
-    //         )
-    //     }
-    // )
-    // const schemaTypes = await generateTypedSchema( config.endpoint )
-    // const rendered: string = schemaTypes
-    // console.log( rendered )
-    // const virtualEntry = virtual( {
-    //     entry: `export const n: number = 32;`
-    // } )
-    // const inputOptions: RollupOptions = {
-    //     input: 'entry',
-    //     plugins: [ virtualEntry as Plugin, typescript( { module: 'EsNext' } ), terser() ]
-    // }
-    // const outputOptions = {
-    //     file: join( __dirname, 'newIndex.js' ),
-    //     format: 'es' as ModuleFormat,
-    // }
-    // const bundle = await rollup( inputOptions )
-    // await bundle.write( outputOptions )
-    // await bundle.close()
     const template: string = readFileSync(
         join( __dirname, 'template.mustache' )
     ).toString()
@@ -125,7 +87,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             declaration: true,
             emitDeclarationOnly: false,
             'target': ScriptTarget.ES2018,
-            'module': ModuleKind.ESNext,
+            'module': ModuleKind.CommonJS,
             'moduleResolution': ModuleResolutionKind.NodeJs,
             'strict': true,
             'esModuleInterop': true,
