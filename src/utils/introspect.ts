@@ -99,7 +99,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
     // const memfs: FS = createFs( volume ) as FS
     const schemaTypes = await generateTypedSchema( config.endpoint )
     writeFileSync(
-        join( __dirname, '_index.ts' ),
+        join( __dirname, 'index.ts' ),
         render( template, {
             operations,
             newTypes: schemaTypes,
