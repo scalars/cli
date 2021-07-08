@@ -1,12 +1,46 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+import { DocumentNode } from 'graphql'
+import fetch from 'node-fetch';
+import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, NormalizedCacheObject, FetchPolicy, gql } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+
+export enum ClientType {
+    IMPLICIT = 'implicit',
+    CODE = 'code'
+}
+
+type FetchFunction = ( uri: string, options: any ) => Promise<any>
+type ApolloClients = {
+    [key in ClientType]: {
+        client: ApolloClient<NormalizedCacheObject>|null
+        fetch?: FetchFunction
+        credentials?: string
+        token?: string
+    }
+}
+
+interface ApolloOptions {
+    fetchPolicy?: FetchPolicy
+}
+
+interface MutationApolloOptions {
+    fetchPolicy?: Extract<FetchPolicy, 'no-cache'>
+}
+
+interface ClientOptions {
+    client?: ClientType
+    apolloOptions?: ApolloOptions
+}
+
+interface MutationClientOptions {
+    client?: ClientType
+    apolloOptions?: MutationApolloOptions
+}
+
 {{#newTypes}}
 {{{.}}}
 {{/newTypes}}
-
-import axios, { AxiosError } from 'axios'
-import { DocumentNode, print } from 'graphql'
-import { gql } from 'graphql-tag'
 
 {{#selects}}
 export type {{name}} = {
@@ -33,35 +67,117 @@ const fillSelectedFields = ( operation: string, select: Record<string, any> ): D
     return gql`${operation.replace( '#@@', parseSelectFields( select ) )}`
 }
 
-class Service {
-    doQuery = async ( query: DocumentNode, args: Record<string, any> ): Promise<any> => {
-        try {
-            const response = await axios.post(
-                {{#config}}'{{{endpoint}}}'{{/config}},
-                {
-                    query: print( query ),
-                    variables: args
-                },
-                {
-                    headers: {
-                        'Authorization': 'client_id {{#config}}{{clientId}}{{/config}}'
-                    }
-                }
-            )
-            return response.data.data
+class ScalarsClientManager {
+    private readonly apolloClients: ApolloClients
+    private readonly defaultClientType: ClientType
+    private readonly cache: InMemoryCache
+    private readonly uri: string
+
+    constructor ( uri: string, token: string, defaultClientType: ClientType = ClientType.IMPLICIT ) {
+        if ( !uri ) {
+            throw new Error( 'URI is empty' )
         }
-        catch ( err: unknown ) {
-            if ( axios.isAxiosError( err ) ) {
-                console.log( `AXIOS ERROR` )
-            }
-            else {
-                console.log( `STOCK ERROR` )
+        this.defaultClientType = defaultClientType;
+        this.uri = uri;
+        this.cache = new InMemoryCache( { addTypename: false } )
+        this.apolloClients = {
+            [ClientType.IMPLICIT]: {
+                client: null,
+                credentials: 'omit',
+                token
+            },
+            [ClientType.CODE]: {
+                client: null,
+                credentials: 'include'
             }
         }
     }
-    doMutation = ( mutation: DocumentNode, args: Record<string, any> ) => {
-        console.log( 'Doing mutation...' )
-        console.log( mutation )
+
+    getClient ( name: ClientType = this.defaultClientType, ssrMode: boolean = false ): ApolloClient<NormalizedCacheObject> {
+        const apolloClient = this.apolloClients[name]
+        if ( apolloClient && !apolloClient.client) {
+            const { credentials, token } = apolloClient
+            let authLink: ApolloLink | undefined;
+            if ( token ) {
+                authLink = setContext( ( _, { headers } ) => {
+                    return {
+                        headers: { ...headers, Authorization: token }
+                    }
+                } )
+            }
+            const httpLink = new HttpLink( {
+                uri: this.uri,
+                credentials,
+                fetch: fetch as any,
+                fetchOptions: {
+                    credentials
+                }
+            } )
+            apolloClient.client = new ApolloClient<NormalizedCacheObject>( {
+                link: authLink ? authLink.concat( httpLink ) : httpLink,
+                cache: this.cache,
+                ssrMode
+            } )
+        }
+        return apolloClient.client as ApolloClient<NormalizedCacheObject>
+    }
+}
+
+class Service {
+    private readonly scalarsClientManager: ScalarsClientManager
+
+    constructor () {
+        this.scalarsClientManager = new ScalarsClientManager(
+            {{#config}}'{{{endpoint}}}'{{/config}},
+            'client_id {{#config}}{{clientId}}{{/config}}',
+        )
+    }
+
+    async doQuery<T, U> (
+        query: DocumentNode,
+        variables?: U,
+        clientOptions?: ClientOptions
+    ): Promise<T> {
+        const client: ApolloClient<NormalizedCacheObject> = this.scalarsClientManager.getClient( clientOptions?.client )
+        try {
+            const response = await client.query( {
+                fetchPolicy: 'network-only',
+                query,
+                variables,
+                ...clientOptions?.apolloOptions
+            } )
+            console.log( response )
+            return this.getResponse<T>( response as any )
+        }
+        catch ( error ) {
+            return this.getResponse<T>( { error: error.networkError.result } as any );
+        }
+    }
+
+    async doMutation<T, U> (
+        mutation: DocumentNode,
+        variables?: U,
+        clientOptions?: MutationClientOptions
+    ): Promise<T> {
+        const client: ApolloClient<NormalizedCacheObject> = this.scalarsClientManager.getClient( clientOptions?.client )
+        try {
+            const response = await client.mutate( {
+                mutation,
+                variables,
+                ...clientOptions?.apolloOptions
+            } )
+            return this.getResponse<T>( response as any )
+        }
+        catch ( error ) {
+            return this.getResponse<T>( { error: error.networkError.result } as any );
+        }
+    }
+
+    private getResponse<T> ( { data, errors, error }: { data: T, errors: T, error: T } ): T {
+        if ( data ) {
+            return data;
+        }
+        throw errors || error;
     }
 }
 
@@ -89,12 +205,12 @@ class QueriesService extends Service {
                 }
             }
         `
-        const response = await this.doQuery( fillSelectedFields( get{{_operation}}Query, select ), {
+        const response = await this.doQuery<{{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}, Query{{_operation}}Args>( fillSelectedFields( get{{_operation}}Query, select ), {
             {{#args}}
             {{name}},
             {{/args}}
         } )
-        return response['{{operation}}']
+        return response
     }
     {{/queries}}
     {{/operations}}
@@ -103,12 +219,12 @@ class QueriesService extends Service {
 class MutationsService extends Service {
     {{#operations}}
     {{#mutations}}
-    {{operation}} (
+    async {{operation}} (
         select: {{#select}}{{name}}{{/select}},
         {{#args}}
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
         {{/args}}
-    ): {{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}} | void {
+    ): Promise<{{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
         const {{_operation}}Mutation: string = `
             mutation {{_operation}} (
             {{#args}}
@@ -124,11 +240,12 @@ class MutationsService extends Service {
                 }
             }
         `
-        this.doMutation( fillSelectedFields( {{_operation}}Mutation, select ), {
+        const response = await this.doMutation<{{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}, Mutation{{_operation}}Args>( fillSelectedFields( {{_operation}}Mutation, select ), {
             {{#args}}
             {{name}},
             {{/args}}
         } )
+        return response
     }
     {{/mutations}}
     {{/operations}}
