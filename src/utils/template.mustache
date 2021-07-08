@@ -38,9 +38,9 @@ interface MutationClientOptions {
     apolloOptions?: MutationApolloOptions
 }
 
-{{#newTypes}}
+{{#schemaTypes}}
 {{{.}}}
-{{/newTypes}}
+{{/schemaTypes}}
 
 {{#selects}}
 export type {{name}} = {
@@ -49,6 +49,10 @@ export type {{name}} = {
     {{/fields}}
 }
 {{/selects}}
+
+{{#returns}}
+export type I{{type}} = Partial<{{{type}}}>
+{{/returns}}
 
 const parseSelectFields = ( select: Record<string ,any> ): string => {
     let fields: string = ''
@@ -146,7 +150,6 @@ class Service {
                 variables,
                 ...clientOptions?.apolloOptions
             } )
-            console.log( response )
             return this.getResponse<T>( response as any )
         }
         catch ( error ) {
@@ -189,7 +192,7 @@ class QueriesService extends Service {
         {{#args}}
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
         {{/args}}
-    ): Promise<{{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
+    ): Promise<{{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
         const get{{_operation}}Query: string = `
             query get{{_operation}} (
             {{#args}}
@@ -205,7 +208,7 @@ class QueriesService extends Service {
                 }
             }
         `
-        const response = await this.doQuery<{{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}, Query{{_operation}}Args>( fillSelectedFields( get{{_operation}}Query, select ), {
+        const { data: response } = await this.doQuery<Record<'data', {{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Query{{_operation}}Args>( fillSelectedFields( get{{_operation}}Query, select ), {
             {{#args}}
             {{name}},
             {{/args}}
@@ -224,7 +227,7 @@ class MutationsService extends Service {
         {{#args}}
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
         {{/args}}
-    ): Promise<{{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
+    ): Promise<{{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
         const {{_operation}}Mutation: string = `
             mutation {{_operation}} (
             {{#args}}
@@ -240,7 +243,7 @@ class MutationsService extends Service {
                 }
             }
         `
-        const response = await this.doMutation<{{#return}}{{#list}}Array<Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}Partial<{{{type}}}>{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}, Mutation{{_operation}}Args>( fillSelectedFields( {{_operation}}Mutation, select ), {
+        const { data: response } = await this.doMutation<Record<'data', {{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Mutation{{_operation}}Args>( fillSelectedFields( {{_operation}}Mutation, select ), {
             {{#args}}
             {{name}},
             {{/args}}
@@ -270,11 +273,11 @@ export class ScalarsClient {
         return this.mutationsService
     }
 
-    async doQuery ( query: string, variables: Record<string, any> ): Promise<any> {
-        return await this.genericService.doQuery( gql`${query}`, variables )
+    async doQuery ( query: string, variables: Record<string, any> ): Promise<Record<'data', any>> {
+        return await this.genericService.doQuery<Record<'data', any >, Record<string, any>>( gql`${query}`, variables )
     }
 
-    async doMutation ( mutation: string, variables: Record<string, any> ): Promise<any> {
-        return await this.genericService.doMutation( gql`${mutation}`, variables )
+    async doMutation ( mutation: string, variables: Record<string, any> ): Promise<Record<'data', any>> {
+        return await this.genericService.doMutation<Record<'data', any >, Record<string, any>>( gql`${mutation}`, variables )
     }
 }

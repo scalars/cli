@@ -7,6 +7,7 @@ import ts, { CompilerHost, CompilerOptions, ModuleKind, ModuleResolutionKind, Pr
 
 
 const selectTypes: Array<Record<string, any>> = []
+const returnTypes: Array<Record<string, any>> = []
 
 const compile = ( fileNames: Array<string>, options: CompilerOptions ): void => {
     const createdFiles: Record<string, any> = {}
@@ -53,8 +54,9 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         join( __dirname, 'index.ts' ),
         render( template, {
             operations,
-            newTypes: schemaTypes,
-            selects: Array.from( selectTypes ),
+            schemaTypes: schemaTypes,
+            selects: selectTypes,
+            returns: returnTypes,
             config
         } )
     )
@@ -199,6 +201,9 @@ const getMutations = ( entity: Record<string, any>, mutations: Array<Record<stri
     const select: Record<string, any> = generateOperationsResponseTypes( entity )
     mutations.forEach( ( mutation: Record<string, any> ) => {
         if ( getEntityFromOperation( mutation.type ) === entity.name ) {
+            const operationReturn: Record<string, any> = getOperationReturnType( mutation.type )
+            if ( !returnTypes.some( ret => ret.type === operationReturn.type ) )
+                returnTypes.push( operationReturn )
             entityMutations.push( {
                 operation: mutation.name,
                 _operation: mutation.name.charAt( 0 ).toUpperCase().concat( mutation.name.slice( 1 ) ),
@@ -206,7 +211,7 @@ const getMutations = ( entity: Record<string, any>, mutations: Array<Record<stri
                 args: mutation.args.map( ( arg: Record<string, any> ) => {
                     return getOperationArgType( arg )
                 } ),
-                return: getOperationReturnType( mutation.type ),
+                return: operationReturn,
                 select
             } )
         }
