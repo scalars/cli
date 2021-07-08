@@ -150,10 +150,10 @@ class Service {
                 variables,
                 ...clientOptions?.apolloOptions
             } )
-            return this.getResponse<T>( response as any )
+            return Service.getResponse<T>( response as any )
         }
         catch ( error ) {
-            return this.getResponse<T>( { error: error.networkError.result } as any );
+            return Service.getResponse<T>( { error: error.networkError.result } as any );
         }
     }
 
@@ -169,17 +169,15 @@ class Service {
                 variables,
                 ...clientOptions?.apolloOptions
             } )
-            return this.getResponse<T>( response as any )
+            return Service.getResponse<T>( response as any )
         }
         catch ( error ) {
-            return this.getResponse<T>( { error: error.networkError.result } as any );
+            return Service.getResponse<T>( { error: error.networkError.result } as any );
         }
     }
 
-    private getResponse<T> ( { data, errors, error }: { data: T, errors: T, error: T } ): T {
+    private static getResponse<T> ( { data, errors, error }: { data: T, errors: T, error: T } ): T {
         if ( data ) {
-            console.log( `Voy a retornar` )
-
             return data;
         }
         throw errors || error;
