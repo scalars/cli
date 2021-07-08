@@ -273,11 +273,13 @@ export class ScalarsClient {
         return this.mutationsService
     }
 
-    async doQuery ( query: string, variables: Record<string, any> ): Promise<Record<'data', any>> {
-        return await this.genericService.doQuery<Record<'data', any >, Record<string, any>>( gql`${query}`, variables )
+    async doQuery ( query: string, variables: Record<string, any> ): Promise<Record<string, any>> {
+        const { data } = await this.genericService.doQuery<Record<'data', any >, Record<string, any>>( gql`${query}`, variables )
+        return data
     }
 
-    async doMutation ( mutation: string, variables: Record<string, any> ): Promise<Record<'data', any>> {
-        return await this.genericService.doMutation<Record<'data', any >, Record<string, any>>( gql`${mutation}`, variables )
+    async doMutation ( mutation: string, variables: Record<string, any> ): Promise<Record<string, any>> {
+        const { data } = await this.genericService.doMutation<Record<'data', any >, Record<string, any>>( gql`${mutation}`, variables )
+        return data
     }
 }
