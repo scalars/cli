@@ -1,5 +1,5 @@
 {
-  "name": "@juaji/scalars-cli",
+  "name": "@scalars/cli",
   "version": "0.1.1",
   "description": "Client for scalars APIs",
   "main": "dist/index.js",
