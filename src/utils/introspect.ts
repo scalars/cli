@@ -84,18 +84,23 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
  * another object type
  * @param fieldType Type of the field
  */
-const getFieldType = ( fieldType: Record<string, any> ): string => {
+const getFieldType = ( fieldType: Record<string, any> ): Record<string, any> => {
     const { kind, ofType, name } = fieldType
-    if ( kind === 'NON_NULL' ) {
+    if ( kind === 'NON_NULL' || kind === 'LIST' ) {
         return getFieldType( ofType )
     }
-    else if ( kind === 'SCALAR' ) {
-        return 'boolean'
+    else if ( kind === 'SCALAR' || kind === 'ENUM' ) {
+        return {
+            type: 'boolean'
+        }
     }
     else if ( kind === 'OBJECT' ) {
-        return `${name}Select`
+        return {
+            type: `${name}Select`,
+        }
     }
-    return 'null' // Unhandled types
+    // TODO Handle fields of type enum
+    return { type: 'undefined' } // Unhandled types
 }
 
 /**
@@ -108,7 +113,7 @@ const generateOperationsResponseTypes = ( entity: Record<string ,any> ): Record<
         fields: entity.fields.map( ( field: Record<string, any> ) => {
             return {
                 name: field.name,
-                type: getFieldType( field.type )
+                ...getFieldType( field.type )
             }
         } )
     }

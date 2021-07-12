@@ -14,7 +14,7 @@
     "rootDir": "src"
   },
   "include": ["./src/**/*.ts"],
-  "exclude": [".dist/**/*.ts"]
+  "exclude": [".dist/**/*.ts", "./src/__test__/**/*"]
 }
 //{
 //  "compilerOptions": {

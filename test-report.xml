@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions version="1">
+  <file path="/home/luisd/Escritorio/sdk/src/__test__/client.test.ts">
+    <testCase name="Registration Should read registration" duration="0"/>
+    <testCase name="Registration Should create registration" duration="0"/>
+    <testCase name="Registration Should update registration" duration="0"/>
+    <testCase name="Registration Should delete registration" duration="0"/>
+    <testCase name="Faq Should read faq" duration="0"/>
+    <testCase name="Faq Should create faq" duration="0"/>
+    <testCase name="Faq Should update faq" duration="0"/>
+    <testCase name="Faq Should delete faq" duration="0"/>
+    <testCase name="Answers Should read answer" duration="0"/>
+    <testCase name="Answers Should create answer" duration="0"/>
+    <testCase name="Answers Should update answer" duration="0"/>
+    <testCase name="Answers Should delete answer" duration="0"/>
+    <testCase name="Skill Should read skill" duration="0"/>
+    <testCase name="Skill Should create skill" duration="0"/>
+    <testCase name="Skill Should update skill" duration="0"/>
+    <testCase name="Skill Should delete skill" duration="0"/>
+    <testCase name="Interest Should read interest" duration="0"/>
+    <testCase name="Interest Should create interest" duration="0"/>
+    <testCase name="Interest Should update interest" duration="0"/>
+    <testCase name="Interest Should delete interest" duration="0"/>
+    <testCase name="Profile Should read profile" duration="2740"/>
+    <testCase name="Profile Should create profile" duration="0"/>
+    <testCase name="Profile Should update profile" duration="0"/>
+    <testCase name="Profile Should delete profile" duration="0"/>
+    <testCase name="Chat Should read chat" duration="0"/>
+    <testCase name="Chat Should create chat" duration="0"/>
+    <testCase name="Chat Should update chat" duration="0"/>
+    <testCase name="Chat Should delete chat" duration="0"/>
+    <testCase name="Message Should read message" duration="0"/>
+    <testCase name="Message Should create message" duration="0"/>
+    <testCase name="Message Should update message" duration="0"/>
+    <testCase name="Message Should delete message" duration="0"/>
+    <testCase name="Connection Should read connection" duration="0"/>
+    <testCase name="Connection Should create connection" duration="0"/>
+    <testCase name="Connection Should update connection" duration="0"/>
+    <testCase name="Connection Should delete connection" duration="0"/>
+    <testCase name="Project Should read project" duration="0"/>
+    <testCase name="Project Should create project" duration="0"/>
+    <testCase name="Project Should update project" duration="0"/>
+    <testCase name="Project Should delete project" duration="0"/>
+    <testCase name="Request Should read request" duration="0"/>
+    <testCase name="Request Should create request" duration="0"/>
+    <testCase name="Request Should update request" duration="0"/>
+    <testCase name="Request Should delete request" duration="0"/>
+    <testCase name="Comment Should read comment" duration="0"/>
+    <testCase name="Comment Should create comment" duration="0"/>
+    <testCase name="Comment Should update comment" duration="0"/>
+    <testCase name="Comment Should delete comment" duration="0"/>
+  </file>
+</testExecutions>
