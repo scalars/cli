@@ -1,4 +1,5 @@
 module.exports = {
+    testTimeout: 540000,
     verbose: true,
     roots: [ './src' ],
     preset: 'ts-jest',
