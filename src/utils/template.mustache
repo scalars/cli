@@ -194,6 +194,7 @@ class QueriesService extends Service {
         {{#args}}
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
         {{/args}}
+        clientOptions?: ClientOptions
     ): Promise<{{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
         const get{{_operation}}Query: string = `
             query get{{_operation}} (
@@ -214,7 +215,7 @@ class QueriesService extends Service {
             {{#args}}
             {{name}},
             {{/args}}
-        } )
+        }, clientOptions )
         return {{operation}}
     }
     {{/queries}}
@@ -229,6 +230,7 @@ class MutationsService extends Service {
         {{#args}}
         {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
         {{/args}}
+        clientOptions?: MutationClientOptions
     ): Promise<{{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
         const {{_operation}}Mutation: string = `
             mutation {{_operation}} (
@@ -249,7 +251,7 @@ class MutationsService extends Service {
             {{#args}}
             {{name}},
             {{/args}}
-        } )
+        }, clientOptions )
         return {{operation}}
     }
     {{/mutations}}
@@ -275,11 +277,11 @@ export class ScalarsClient {
         return this.mutationsService
     }
 
-    async doQuery ( query: string, variables: Record<string, any> ): Promise<Record<string, any>> {
-        return await this.genericService.doQuery<Record<string, any >, Record<string, any>>( gql`${query}`, variables )
+    async doQuery ( query: string, variables: Record<string, any>, clientOptions?: ClientOptions ): Promise<Record<string, any>> {
+        return await this.genericService.doQuery<Record<string, any >, Record<string, any>>( gql`${query}`, variables, clientOptions )
     }
 
-    async doMutation ( mutation: string, variables: Record<string, any> ): Promise<Record<string, any>> {
-        return await this.genericService.doMutation<Record<string, any >, Record<string, any>>( gql`${mutation}`, variables )
+    async doMutation ( mutation: string, variables: Record<string, any>, clientOptions?: MutationClientOptions ): Promise<Record<string, any>> {
+        return await this.genericService.doMutation<Record<string, any >, Record<string, any>>( gql`${mutation}`, variables, clientOptions )
     }
 }
