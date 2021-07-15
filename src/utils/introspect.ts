@@ -150,6 +150,12 @@ const getOperationReturnType = ( type: Record<string, any>, required: boolean = 
     return result
 }
 
+const getArgsCombined = ( args: Array<Record<string, any>>, pivot?: Record<string, any> ): Array<Record<string, any>> => {
+    const combinations: Array<Record<string, any>> = []
+
+    return combinations
+}
+
 /**
  * This function build an object containing the arg of an operation (query or mutation) by its type passed as
  * parameter
@@ -213,9 +219,17 @@ const getMutations = ( entity: Record<string, any>, mutations: Array<Record<stri
                 operation: mutation.name,
                 _operation: mutation.name.charAt( 0 ).toUpperCase().concat( mutation.name.slice( 1 ) ),
                 entity: entity.name,
-                args: mutation.args.map( ( arg: Record<string, any> ) => {
-                    return getOperationArgType( arg )
-                } ),
+                args: mutation.args
+                    .map( ( arg: Record<string, any> ) => getOperationArgType( arg ) )
+                    .sort( ( a: Record<string ,any>, b: Record<string ,any> ) => {
+                        if ( a.requiredType && !b.requiredType ) {
+                            return -1
+                        }
+                        if ( b.requiredType && !a.requiredType ) {
+                            return 1
+                        }
+                        return 0
+                    } ),
                 return: operationReturn,
                 select
             } )
@@ -235,14 +249,21 @@ const getQueries = ( entity: Record<string, any>, queries: Array<Record<string, 
     const select: Record<string ,any> = generateOperationsResponseTypes( entity )
     queries.forEach( ( query: Record<string, any > ) => {
         if ( getEntityFromOperation( query.type ) === entity.name ) {
-            const args: Array<Record<string, any>> = query.args.map( ( arg: Record<string, any> ) => {
-                return getOperationArgType( arg )
-            } )
             entityQueries.push( {
                 operation: query.name,
                 _operation: query.name.charAt( 0 ).toUpperCase().concat( query.name.slice( 1 ) ),
                 entity: entity.name,
-                args, argsRequired: !!args.find( arg => arg.requiredType ),
+                args: query.args
+                    .map( ( arg: Record<string, any> ) => getOperationArgType( arg ) )
+                    .sort( ( a: Record<string ,any>, b: Record<string ,any> ) => {
+                        if ( a.requiredType && !b.requiredType ) {
+                            return -1
+                        }
+                        if ( b.requiredType && !a.requiredType ) {
+                            return 1
+                        }
+                        return 0
+                    } ),
                 return: getOperationReturnType( query.type ),
                 select
             } )

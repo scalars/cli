@@ -15,9 +15,9 @@ describe( `Registration`, () => {
         let registrationId: string = ''
         test( `Should read registrations`, ( done ) => {
             client.query
-                .registrations(
-                    { id: true }
-                )
+                .registrations( {
+                    select: { id: true }
+                } )
                 .then( ( res: Array<IRegistration> ) => {
                     expect( res ).toEqual( arrayContaining( [objectContaining( {
                         id: stringMatching( idRegex ),
@@ -32,10 +32,10 @@ describe( `Registration`, () => {
         test( `Should read registration`, ( done ) => {
             expect( registrationId ).toEqual( stringMatching( idRegex ) )
             client.query
-                .registration(
-                    { email: true, name: true, createdAt: true, updatedAt: true, linkedin: true },
-                    { id: registrationId }
-                )
+                .registration( {
+                    select: { email: true, name: true, createdAt: true, updatedAt: true, linkedin: true },
+                    where: { id: registrationId }
+                } )
                 .then( ( res: IRegistration ) => {
                     expect( res ).toEqual( objectContaining( {
                         email: stringMatching( emailRegex ),
@@ -53,14 +53,14 @@ describe( `Registration`, () => {
         let registrationId: string = ''
         test( `Should create registration`, ( done ) => {
             client.mutation
-                .createRegistration(
-                    { id: true },
-                    {
+                .createRegistration( {
+                    select: { id: true },
+                    data: {
                         email: createRegistration.email,
                         name: createRegistration.name,
                         linkedin: createRegistration.linkedin
                     }
-                )
+                } )
                 .then( ( res: IRegistration ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringMatching( idRegex )
@@ -73,11 +73,11 @@ describe( `Registration`, () => {
         test( `Should update registration`, ( done ) => {
             expect( registrationId ).toEqual( stringMatching( idRegex ) )
             client.mutation
-                .updateRegistration(
-                    { id: true, name: true, email: true, linkedin: true, createdAt: true, updatedAt: true },
-                    { id: registrationId },
-                    { email: updateRegistration.email, name: updateRegistration.name }
-                )
+                .updateRegistration( {
+                    select: { id: true, name: true, email: true, linkedin: true, createdAt: true, updatedAt: true },
+                    where: { id: registrationId },
+                    data: { email: updateRegistration.email, name: updateRegistration.name }
+                } )
                 .then( ( res: IRegistration ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringContaining( registrationId ),
@@ -94,10 +94,10 @@ describe( `Registration`, () => {
         test( `Should delete registration`, ( done ) => {
             expect( registrationId ).toEqual( stringMatching( idRegex ) )
             client.mutation
-                .deleteRegistration(
-                    { id: true, name: true, email: true, createdAt: true, linkedin:true, updatedAt: true },
-                    { id: registrationId }
-                )
+                .deleteRegistration( {
+                    select: { id: true, name: true, email: true, createdAt: true, linkedin: true, updatedAt: true },
+                    where: { id: registrationId }
+                } )
                 .then( ( res: IRegistration ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringContaining( registrationId ),
@@ -118,11 +118,11 @@ describe( `Faq`, () => {
     const { createFaq, updateFaq } = faqSeeds
     describe( `Should read multiple and single faqs`, ()  => {
         let faqId: string = ''
-        test(  `Should read faqs`, ( done ) => {
+        test( `Should read faqs`, ( done ) => {
             client.query
-                .faqs(
-                    { id: true }
-                )
+                .faqs( {
+                    select: { id: true }
+                } )
                 .then( ( res: Array<IFaq> ) => {
                     expect( res ).toEqual( arrayContaining( [objectContaining( {
                         id: stringMatching( idRegex )
@@ -137,10 +137,10 @@ describe( `Faq`, () => {
         test( `Should read faq`, ( done ) => {
             expect( faqId ).toEqual( stringMatching( idRegex ) )
             client.query
-                .faq(
-                    { answer: true, question: true, createdAt: true, updatedAt: true },
-                    { id: faqId }
-                )
+                .faq( {
+                    select: { answer: true, question: true, createdAt: true, updatedAt: true },
+                    where: { id: faqId }
+                } )
                 .then( ( res: IFaq ) => {
                     expect( res ).toEqual( objectContaining( {
                         answer: stringContaining( '' ),
@@ -157,15 +157,15 @@ describe( `Faq`, () => {
         let faqId: string = ''
         test( `Should create faq`, ( done ) => {
             client.mutation
-                .createFaq(
-                    {
+                .createFaq( {
+                    select: {
                         id: true
                     },
-                    {
+                    data: {
                         question: createFaq.question,
                         answer: createFaq.answer
                     }
-                )
+                } )
                 .then ( ( res: IFaq ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringMatching( idRegex )
@@ -178,11 +178,11 @@ describe( `Faq`, () => {
         test( `Should update faq`, ( done ) => {
             expect( faqId ).toEqual( stringMatching( idRegex ) )
             client.mutation
-                .updateFaq(
-                    { id: true, question: true, answer: true, createdAt: true, updatedAt: true },
-                    { id: faqId },
-                    { question: updateFaq.question }
-                )
+                .updateFaq( {
+                    select: { id: true, question: true, answer: true, createdAt: true, updatedAt: true },
+                    where: { id: faqId },
+                    data: { question: updateFaq.question }
+                } )
                 .then( ( res: IFaq ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringContaining( faqId ),
@@ -198,10 +198,10 @@ describe( `Faq`, () => {
         test( `Should delete faq`, ( done ) => {
             expect( faqId ).toEqual( stringMatching( idRegex ) )
             client.mutation
-                .deleteFaq(
-                    { id: true, answer: true, question: true, createdAt: true, updatedAt: true },
-                    { id: faqId }
-                )
+                .deleteFaq( {
+                    select: { id: true, answer: true, question: true, createdAt: true, updatedAt: true },
+                    where: { id: faqId }
+                } )
                 .then( ( res: IFaq ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringContaining( faqId ),
@@ -331,10 +331,10 @@ describe( `Profile`, () => {
             user: { username: true }
         }
         client.query
-            .profile(
-                profileSelect,
-                { email: 'andres@madrov.com' }
-            )
+            .profile( {
+                select: profileSelect,
+                where: { email: 'andres@madrov.com' }
+            } )
             .then ( ( res: IProfile ) => {
                 console.log( res )
                 expect( res ).toEqual( expect.objectContaining( {
