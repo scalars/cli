@@ -211,11 +211,11 @@ class QueriesService extends Service {
                 }
             }
         `
-        const { {{operation}} } = await this.doQuery<Record<'{{operation}}', {{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Query{{_operation}}Args>( fillSelectedFields( get{{_operation}}Query, args.select || { id: true } ), {
-            {{#args}}
-            {{name}}: args.{{name}} || null,
-            {{/args}}
-        }, args.clientOptions )
+        const { {{operation}} } = await this.doQuery<Record<'{{operation}}', {{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Query{{_operation}}Args>(
+            fillSelectedFields( get{{_operation}}Query, args.select || { id: true } ),
+            Object.fromEntries( Object.entries( args ).filter( ( [ k, v ] ) =>  v !== null ) ),
+            args.clientOptions
+        )
         return {{operation}}
     }
     {{/queries}}
@@ -247,11 +247,11 @@ class MutationsService extends Service {
                 }
             }
         `
-        const { {{operation}} } = await this.doMutation<Record<'{{operation}}', {{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Mutation{{_operation}}Args>( fillSelectedFields( {{_operation}}Mutation, args.select || { id: true } ), {
-            {{#args}}
-            {{name}}: args.{{name}} || null,
-            {{/args}}
-        }, args.clientOptions )
+        const { {{operation}} } = await this.doMutation<Record<'{{operation}}', {{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Mutation{{_operation}}Args>(
+            fillSelectedFields( {{_operation}}Mutation, args.select || { id: true } ),
+            Object.fromEntries( Object.entries( args ).filter( ( [ k, v ] ) =>  v !== null ) ),
+            args.clientOptions
+        )
         return {{operation}}
     }
     {{/mutations}}
