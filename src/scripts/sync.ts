@@ -16,13 +16,8 @@ if ( !errors ) {
             endpoint: endpoint as string,
             clientId: clientId as string
         } ).then( () => {
-            console.log( `
-            Introspection completed!!
-                Thanks for using scalars client!
-                On your code you need to create an instance of the client like this:
-                    const client = new ScalarsClient()
-                Happy codding!!
-                Your friendly neighbors Luis Danilo JG and Madrov team ❤️
+            console.clear()
+            console.log( ` Introspection completed!!\n\tThanks for using scalars client!\n\tOn your code you need to create an instance of the client like this:\n\t\tconst client = new ScalarsClient()\n\tHappy codding!!\n\tYour friendly neighbors Luis Danilo JG and Madrov team ❤️
             ` )
         } )
     }
