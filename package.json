@@ -41,7 +41,7 @@
   "bin": {
     "sync": "dist/sync.js"
   },
-  "repository": "https://gitlab.com/LuisDanilo/scalars-cli",
+  "repository": "https://github.com/scalars/cli",
   "dependencies": {
     "@apollo/client": "^3.3.21",
     "@graphql-codegen/cli": "^1.21.5",
