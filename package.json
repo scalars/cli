@@ -1,6 +1,6 @@
 {
   "name": "@scalars/cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Client for scalars APIs",
   "main": "dist/index.js",
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
@@ -43,17 +43,16 @@
   },
   "repository": "https://github.com/scalars/cli",
   "dependencies": {
+    "tsc-prog": "^2.2.1",
     "@apollo/client": "^3.3.21",
     "@graphql-codegen/cli": "^1.21.5",
     "@graphql-codegen/introspection": "^1.18.2",
     "@graphql-codegen/typescript": "^1.22.3",
     "@graphql-codegen/typescript-operations": "^1.18.2",
     "dotenv": "^10.0.0",
+    "graphql": "^15.5.1",
     "mustache": "^4.2.0",
     "node-fetch": "^2.6.1",
     "react": "^17.0.2"
-  },
-  "peerDependencies": {
-    "graphql": "^15.5.1"
   }
 }

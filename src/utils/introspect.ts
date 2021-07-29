@@ -3,23 +3,17 @@ import { join } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 import { render } from 'mustache'
 import { ScalarsClientConfig } from './interfaces'
-import ts, { CompilerHost, CompilerOptions, ModuleKind, ModuleResolutionKind, Program, ScriptTarget } from 'typescript'
-
+import tsc, { TsConfigCompilerOptions } from 'tsc-prog'
 
 const selectTypes: Array<Record<string, any>> = []
 const returnTypes: Array<Record<string, any>> = []
 
-const compile = ( fileNames: Array<string>, options: CompilerOptions ): void => {
-    const createdFiles: Record<string, any> = {}
-    const host: CompilerHost = ts.createCompilerHost( options )
-    host.writeFile = ( fileName: string, contents: string ) => createdFiles[fileName] = contents
-    const program: Program = ts.createProgram( fileNames, options, host )
-    program.emit()
-    fileNames.forEach( file => {
-        const js = file.replace( '.ts', '.js' )
-        const dts = file.replace( '.ts', '.d.ts' )
-        writeFileSync( dts, createdFiles[dts] )
-        writeFileSync( js, createdFiles[js] )
+const compile = ( fileNames: Array<string>, options: TsConfigCompilerOptions ): void => {
+    tsc.build( {
+        basePath: __dirname,
+        compilerOptions: options,
+        include: fileNames,
+        exclude: []
     } )
 }
 
@@ -64,14 +58,14 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         compile( [join( __dirname, 'index.ts' )], {
             declaration: true,
             emitDeclarationOnly: false,
-            'target': ScriptTarget.ES2018,
-            'module': ModuleKind.CommonJS,
-            'moduleResolution': ModuleResolutionKind.NodeJs,
-            'strict': true,
-            'esModuleInterop': true,
-            'skipLibCheck': true,
-            'forceConsistentCasingInFileNames': true,
-            'outDir': __dirname,
+            target: 'es2019',
+            module: 'commonjs',
+            moduleResolution: 'node',
+            strict: true,
+            esModuleInterop: true,
+            skipLibCheck: true,
+            forceConsistentCasingInFileNames: true,
+            outDir: __dirname,
         } )
     }
     catch ( e ) {
@@ -249,6 +243,9 @@ const getQueries = ( entity: Record<string, any>, queries: Array<Record<string, 
     const select: Record<string ,any> = generateOperationsResponseTypes( entity )
     queries.forEach( ( query: Record<string, any > ) => {
         if ( getEntityFromOperation( query.type ) === entity.name ) {
+            const operationReturn: Record<string, any> = getOperationReturnType( query.type )
+            if ( !returnTypes.some( ret => ret.type === operationReturn.type ) )
+                returnTypes.push( operationReturn )
             entityQueries.push( {
                 operation: query.name,
                 _operation: query.name.charAt( 0 ).toUpperCase().concat( query.name.slice( 1 ) ),
@@ -264,7 +261,7 @@ const getQueries = ( entity: Record<string, any>, queries: Array<Record<string, 
                         }
                         return 0
                     } ),
-                return: getOperationReturnType( query.type ),
+                return: operationReturn,
                 select
             } )
         }
