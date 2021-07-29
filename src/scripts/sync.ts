@@ -25,11 +25,12 @@ if ( !errors ) {
     clientId = process.env.SCALARS_CLIENT_ID
     errors = !endpoint && !clientId
     if ( !errors ) {
-        if ( process.argv[2] === 'sync' ) {
+        const arg: string = process.argv[2]
+        if ( arg && /sync/g.test( arg ) ) {
             sync()
         }
         else {
-            console.log( `Error!\n\t${process.argv} is not an option` )
+            console.log( `Error!\n\t${arg ? `${arg} is not an option` : `must specify an argument for scalars command`}` )
         }
     }
     else {
