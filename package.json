@@ -39,7 +39,7 @@
     "typescript": "^4.3.4"
   },
   "bin": {
-    "sync": "dist/sync.js"
+    "scalars": "dist/sync.js"
   },
   "repository": "https://github.com/scalars/cli",
   "dependencies": {
