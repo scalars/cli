@@ -13,7 +13,7 @@ export default [
             },
         ],
         plugins: [typescript(), terser()],
-        external: ['dotenv', 'path', '@graphql-codegen/cli', 'fs', 'mustache', 'rollup', '@rollup/plugin-typescript', 'rollup-plugin-terser', 'typescript']
+        external: ['dotenv', 'path', '@graphql-codegen/cli', 'fs', 'mustache', 'rollup', '@rollup/plugin-typescript', 'rollup-plugin-terser', 'tsc-prog']
     },
     {
         input: './dist/dts/index.d.ts',
