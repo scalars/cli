@@ -18,8 +18,15 @@ const compile = ( fileNames: Array<string>, options: CompilerOptions ): void => 
     fileNames.forEach( file => {
         const js = file.replace( '.ts', '.js' )
         const dts = file.replace( '.ts', '.d.ts' )
-        writeFileSync( dts, createdFiles[dts] )
-        writeFileSync( js, createdFiles[js] )
+        try {
+            console.log( `Debo crear el archivo ${dts}` )
+            writeFileSync( dts, createdFiles[dts] )
+            console.log( `Debo crear el archivo ${js}` )
+            writeFileSync( js, createdFiles[js] )
+        }
+        catch ( e ) {
+            console.error( e )
+        }
     } )
 }
 
@@ -50,6 +57,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         join( __dirname, 'template.mustache' )
     ).toString()
     const schemaTypes = await generateTypedSchema( config.endpoint )
+
     writeFileSync(
         join( __dirname, 'index.ts' ),
         render( template, {
