@@ -1,6 +1,6 @@
 {
   "name": "@scalars/cli",
-  "version": "1.0.3",
+  "version": "1.0.8",
   "description": "Client for scalars APIs",
   "main": "dist/index.js",
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
@@ -8,7 +8,8 @@
   "scripts": {
     "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && cp src/utils/template.mustache dist/template.mustache",
     "test": "yarn build && node dist/sync.js && jest --detectOpenHandles --forceExit --testTimeout=540000",
-    "jest": "jest --testTimeout=540000 --runInBand"
+    "jest": "jest --testTimeout=540000 --runInBand",
+    "postinstall": "node dist/sync.js "
   },
   "files": [
     "dist"
@@ -39,7 +40,7 @@
     "typescript": "^4.3.4"
   },
   "bin": {
-    "sync": "dist/sync.js"
+    "scalars": "dist/sync.js"
   },
   "repository": "https://github.com/scalars/cli",
   "dependencies": {
