@@ -30,11 +30,13 @@ interface MutationApolloOptions {
 
 interface ClientOptions {
     client?: ClientType
+    auth?: boolean
     apolloOptions?: ApolloOptions
 }
 
 interface MutationClientOptions {
     client?: ClientType
+    auth?: boolean
     apolloOptions?: MutationApolloOptions
 }
 
@@ -128,11 +130,16 @@ class ScalarsClientManager {
 }
 
 class Service {
-    private readonly scalarsClientManager: ScalarsClientManager
+    private readonly scalarsApiClientManager: ScalarsClientManager
+    private readonly scalarsAuthClientManager: ScalarsClientManager
 
     constructor () {
-        this.scalarsClientManager = new ScalarsClientManager(
-            {{#config}}'{{{endpoint}}}'{{/config}},
+        this.scalarsApiClientManager = new ScalarsClientManager(
+            {{#config}}'{{{endpoint}}}/api'{{/config}},
+            'client_id {{#config}}{{clientId}}{{/config}}',
+        )
+        this.scalarsAuthClientManager = new ScalarsClientManager(
+            {{#config}}'{{{endpoint}}}/api/auth/users'{{/config}},
             'client_id {{#config}}{{clientId}}{{/config}}',
         )
     }
@@ -142,7 +149,9 @@ class Service {
         variables?: U,
         clientOptions?: ClientOptions
     ): Promise<T> {
-        const client: ApolloClient<NormalizedCacheObject> = this.scalarsClientManager.getClient( clientOptions?.client )
+        const client: ApolloClient<NormalizedCacheObject> = clientOptions?.auth
+            ? this.scalarsAuthClientManager.getClient( clientOptions?.client )
+            : this.scalarsApiClientManager.getClient( clientOptions?.client )
         try {
             const response = await client.query( {
                 fetchPolicy: 'network-only',
@@ -153,7 +162,6 @@ class Service {
             return Service.getResponse<T>( response as any )
         }
         catch ( error ) {
-            // console.log(`Hubo un error`, error)
             return Service.getResponse<T>( { error } as any );
         }
     }
@@ -163,7 +171,9 @@ class Service {
         variables?: U,
         clientOptions?: MutationClientOptions
     ): Promise<T> {
-        const client: ApolloClient<NormalizedCacheObject> = this.scalarsClientManager.getClient( clientOptions?.client )
+        const client: ApolloClient<NormalizedCacheObject> = clientOptions?.auth
+            ? this.scalarsAuthClientManager.getClient( clientOptions?.client )
+            : this.scalarsApiClientManager.getClient( clientOptions?.client )
         try {
             const response = await client.mutate( {
                 mutation,
@@ -173,7 +183,6 @@ class Service {
             return Service.getResponse<T>( response as any )
         }
         catch ( error ) {
-            // console.log(`Hubo un error`, error)
             return Service.getResponse<T>( { error } as any );
         }
     }
@@ -214,7 +223,7 @@ class QueriesService extends Service {
         const { {{operation}} } = await this.doQuery<Record<'{{operation}}', {{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Query{{_operation}}Args>(
             fillSelectedFields( get{{_operation}}Query, args.select || { id: true } ),
             Object.fromEntries( Object.entries( args ).filter( ( [ k, v ] ) =>  v !== null && k !== 'select' && k !== 'clientOptions' ) ) as Query{{_operation}}Args,
-            args.clientOptions
+            { ...args.clientOptions, auth: {{#authOperation}}true{{/authOperation}}{{^authOperation}}false{{/authOperation}} }
         )
         return {{operation}}
     }
@@ -250,7 +259,7 @@ class MutationsService extends Service {
         const { {{operation}} } = await this.doMutation<Record<'{{operation}}', {{#return}}{{#list}}Array<I{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}I{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Mutation{{_operation}}Args>(
             fillSelectedFields( {{_operation}}Mutation, args.select || { id: true } ),
             Object.fromEntries( Object.entries( args ).filter( ( [ k, v ] ) =>  v !== null && k !== 'select' && k !== 'clientOptions' ) ) as Mutation{{_operation}}Args,
-            args.clientOptions
+            { ...args.clientOptions, auth: {{#authOperation}}true{{/authOperation}}{{^authOperation}}false{{/authOperation}} }
         )
         return {{operation}}
     }

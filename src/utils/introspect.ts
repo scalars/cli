@@ -19,13 +19,13 @@ const compile = ( fileNames: Array<string>, options: TsConfigCompilerOptions ): 
 
 /**
  * This function generates types by introspecting the API
- * @param scalarsApi Endpoint of API to introspect
+ * @param scalarsEndpoint Endpoint of API to introspect
  */
-const generateTypedSchema = async ( scalarsApi: string ): Promise<string> => {
+const generateTypedSchema = async ( scalarsEndpoint: string ): Promise<string> => {
     const { '0': { content } } = await generate( {
         generates: {
             [join( __dirname, 'newTypes.ts' )]: {
-                schema: scalarsApi,
+                schema: scalarsEndpoint.endsWith( '/' ) ? `${scalarsEndpoint}api` : `${scalarsEndpoint}/api`,
                 plugins: ['typescript', 'typescript-operations'],
             }
         }
@@ -144,12 +144,6 @@ const getOperationReturnType = ( type: Record<string, any>, required: boolean = 
     return result
 }
 
-const getArgsCombined = ( args: Array<Record<string, any>>, pivot?: Record<string, any> ): Array<Record<string, any>> => {
-    const combinations: Array<Record<string, any>> = []
-
-    return combinations
-}
-
 /**
  * This function build an object containing the arg of an operation (query or mutation) by its type passed as
  * parameter
@@ -212,6 +206,7 @@ const getMutations = ( entity: Record<string, any>, mutations: Array<Record<stri
             entityMutations.push( {
                 operation: mutation.name,
                 _operation: mutation.name.charAt( 0 ).toUpperCase().concat( mutation.name.slice( 1 ) ),
+                authOperation: /^createAuthuser$/g.test( mutation.name ),
                 entity: entity.name,
                 args: mutation.args
                     .map( ( arg: Record<string, any> ) => getOperationArgType( arg ) )
@@ -249,6 +244,7 @@ const getQueries = ( entity: Record<string, any>, queries: Array<Record<string, 
             entityQueries.push( {
                 operation: query.name,
                 _operation: query.name.charAt( 0 ).toUpperCase().concat( query.name.slice( 1 ) ),
+                authOperation: /^createAuthuser$/g.test( query.name ),
                 entity: entity.name,
                 args: query.args
                     .map( ( arg: Record<string, any> ) => getOperationArgType( arg ) )
@@ -305,13 +301,13 @@ const getServicesByOperations = ( objects: Array<Record<string, any>> ): Record<
 /**
  * This function makes introspection to the API and filters the result for obtain only
  * the introspection of objects
- * @param scalarsApi Endpoint of API to introspect
+ * @param scalarsEndpoint Endpoint of API to introspect
  */
-const getIntrospectionFilteredByObjects = async ( scalarsApi: string ): Promise<Array<Record<string, any>>> => {
+const getIntrospectionFilteredByObjects = async ( scalarsEndpoint: string ): Promise<Array<Record<string, any>>> => {
     const { '0': { content } } = await generate( {
         generates: {
             'introspection.json': {
-                schema: scalarsApi,
+                schema: scalarsEndpoint.endsWith( '/' ) ? `${scalarsEndpoint}api` : `${scalarsEndpoint}/api`,
                 plugins: ['introspection'],
                 config: {
                     minify: false,

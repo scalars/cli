@@ -1,5 +1,5 @@
 {
-  "name": "@scalars/cli",
+  "name": "@juaji/scalars-cli",
   "version": "1.0.8",
   "description": "Client for scalars APIs",
   "main": "dist/index.js",
@@ -42,9 +42,8 @@
   "bin": {
     "scalars": "dist/sync.js"
   },
-  "repository": "https://github.com/scalars/cli",
+  "repository": "https://gitlab.com/LuisDanilo/scalars-cli",
   "dependencies": {
-    "tsc-prog": "^2.2.1",
     "@apollo/client": "^3.3.21",
     "@graphql-codegen/cli": "^1.21.5",
     "@graphql-codegen/introspection": "^1.18.2",
@@ -54,6 +53,7 @@
     "graphql": "^15.5.1",
     "mustache": "^4.2.0",
     "node-fetch": "^2.6.1",
-    "react": "^17.0.2"
+    "react": "^17.0.2",
+    "tsc-prog": "^2.2.1"
   }
 }
