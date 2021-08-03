@@ -1,6 +1,6 @@
 {
   "name": "@juaji/scalars-cli",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Client for scalars APIs",
   "main": "dist/index.js",
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
