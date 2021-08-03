@@ -47,5 +47,5 @@ if ( arg && /^sync$/g.test( arg ) ) {
     }
 
 } else {
-    console.log( `Error!\n\t${arg ? `${arg} is not an option` : `must specify an argument for scalars command`}` )
+    console.log( `Error!\n\t${arg ? `${arg} is not an option` : `Make sure you specified an argument for scalars command`}` )
 }
