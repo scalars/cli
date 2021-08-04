@@ -4,9 +4,9 @@ import { join } from 'path'
 import { usage } from 'yargs'
 import inquirer from 'inquirer'
 
-// Trying to set endpoint and clientId by envoronment variables
-let endpoint: string | null = process.env.SCALARS_ENDPOINT | null
-let clientId: string | null = process.env.SCALARS_CLIENT_ID | null
+// Trying to set endpoint and clientId by environment variables
+let endpoint: string | null = process.env.SCALARS_ENDPOINT || null
+let clientId: string | null = process.env.SCALARS_CLIENT_ID || null
 
 /**
  * Function that starts introspection
@@ -14,10 +14,35 @@ let clientId: string | null = process.env.SCALARS_CLIENT_ID | null
 const sync = () => {
     inquirer
         .prompt( [
-            // Questions
+            {
+                type: 'confirm',
+                name: 'urMomGay',
+                message: 'Responde con algo...',
+                default: 'y',
+                choices: [
+                    {
+                        name: 'Yes',
+                        value: 'y',
+                        short: 'Yeah!'
+                    },
+                    {
+                        name: 'Nope',
+                        value: 'n',
+                        short: 'Of course no'
+                    }
+                ],
+                validate: ( input ) => {
+                    if ( input === 'y' || input === 'n' ) return true
+                    else return 'No es una opción válida'
+                }
+            }
         ] )
         .then( ( answers ) => {
-            // Use feedback
+            if ( answers['urMomGay'] ) {
+                sync()
+            } else {
+                console.log( 'No se hace introspección porque tu mama no es gay' )
+            }
         } )
         .catch( ( error ) => {
             console.log( error )
@@ -43,8 +68,8 @@ export const argv = usage( '$0 command' )
             err = !!error
             if ( !err ) {
                 // dotenv has loaded .env.* file
-                endpoint = process.env.SCALARS_ENDPOINT
-                clientId = process.env.SCALARS_CLIENT_ID
+                endpoint = process.env.SCALARS_ENDPOINT || null
+                clientId = process.env.SCALARS_CLIENT_ID || null
                 err = !endpoint && !clientId
                 if ( !err ) sync()
                 else console.log( `Error!\n\tMake sure you specified your scalars endpoint as SCALARS_ENDPOINT and\n\tyour client id as SCALARS_CLIENT_ID at ${envPath}.` )
