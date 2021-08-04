@@ -15,18 +15,18 @@ export default [
         plugins: [typescript(), terser()],
         external: ['dotenv', 'path', '@graphql-codegen/cli', 'fs', 'mustache', 'rollup', '@rollup/plugin-typescript', 'rollup-plugin-terser', 'tsc-prog', 'eta']
     },
-    // {
-    //     input: 'src/scripts/postinstall.ts',
-    //     output: [
-    //         {
-    //             file: 'dist/postinstall.js',
-    //             format: 'commonjs',
-    //             banner: '#!/usr/bin/env node',
-    //         },
-    //     ],
-    //     plugins: [typescript(), terser()],
-    //     external: ['dotenv', 'path', '@graphql-codegen/cli', 'fs', 'mustache', 'rollup', '@rollup/plugin-typescript', 'rollup-plugin-terser', 'tsc-prog', 'eta']
-    // },
+    {
+        input: 'src/scripts/postinstall.ts',
+        output: [
+            {
+                file: 'dist/postinstall.js',
+                format: 'commonjs',
+                banner: '#!/usr/bin/env node',
+            },
+        ],
+        plugins: [typescript(), terser()],
+        external: ['dotenv', 'path', '@graphql-codegen/cli', 'fs', 'mustache', 'rollup', '@rollup/plugin-typescript', 'rollup-plugin-terser', 'tsc-prog', 'eta']
+    },
     {
         input: './dist/dts/index.d.ts',
         output: [{ file: 'dist/index.d.ts', format: 'es' }],
