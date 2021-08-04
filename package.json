@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && cp src/utils/template.mustache dist/template.mustache",
     "test": "yarn build && node dist/sync.js && jest --detectOpenHandles --forceExit --testTimeout=540000",
-    "jest": "jest --testTimeout=540000 --runInBand",
+    "jest": "jest --testTimeout=540000 --runInBand"
   },
   "files": [
     "dist"
@@ -22,6 +22,7 @@
   ],
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.2.1",
+    "@types/inquirer": "^7.3.3",
     "@types/jest": "^26.0.24",
     "@types/mustache": "^4.1.1",
     "@types/node-fetch": "^2.5.11",
@@ -50,10 +51,11 @@
     "@graphql-codegen/typescript-operations": "^2.0.1",
     "dotenv": "^10.0.0",
     "graphql": "^15.5.1",
+    "inquirer": "^8.1.2",
     "mustache": "^4.2.0",
     "node-fetch": "^2.6.1",
-    "yargs": "^17.0.1"
     "react": "^17.0.2",
-    "tsc-prog": "^2.2.1"
+    "tsc-prog": "^2.2.1",
+    "yargs": "^17.0.1"
   }
 }
