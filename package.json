@@ -9,7 +9,7 @@
     "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && cp src/utils/template.mustache dist/template.mustache",
     "test": "yarn build && node dist/sync.js && jest --detectOpenHandles --forceExit --testTimeout=540000",
     "jest": "jest --testTimeout=540000 --runInBand",
-    "prepack": "node dist/sync.js sync"
+    "prepublish": "node dist/sync.js sync"
   },
   "files": [
     "dist"
