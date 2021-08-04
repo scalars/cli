@@ -18,7 +18,7 @@ const sync = () => {
                 type: 'confirm',
                 name: 'urMomGay',
                 message: 'Responde con algo...',
-                default: 'y',
+                // default: 'y',
                 choices: [
                     {
                         name: 'Yes',
@@ -32,8 +32,13 @@ const sync = () => {
                     }
                 ],
                 validate: ( input ) => {
-                    if ( input === 'y' || input === 'n' ) return true
-                    else return 'No es una opción válida'
+                    if ( input === 'y' || input === 'n' ) {
+                        console.log( 'Respondiste acertadamente ' )
+                        return true
+                    }
+                    else {
+                        return 'No es una opción válida'
+                    }
                 }
             }
         ] )
@@ -51,7 +56,6 @@ const sync = () => {
         endpoint: endpoint as string,
         clientId: clientId as string
     } ).then( () => {
-        console.clear()
         console.log( `Introspection completed!!\n\tThanks for using scalars client!\n\tOn your code you need to create an instance of the client like this:\n\t\tconst client = new ScalarsClient()\n\tHappy codding!!\n\tYour friendly neighbors Luis Danilo JG and Madrov team ❤️` )
     } )
 }
