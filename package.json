@@ -10,7 +10,7 @@
     "test": "yarn build && node dist/sync.js && jest --detectOpenHandles --forceExit --testTimeout=540000",
     "jest": "jest --testTimeout=540000 --runInBand",
     "install": "echo \"Installing...\"",
-    "postinstall": "node dist/sync.js sync && node dist/postinstall.js"
+    "postinstall": "yarn run scalars sync"
   },
   "files": [
     "dist"
