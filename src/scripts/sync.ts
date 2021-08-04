@@ -44,7 +44,12 @@ const sync = () => {
         ] )
         .then( ( answers ) => {
             if ( answers['urMomGay'] ) {
-                sync()
+                introspect( {
+                    endpoint: endpoint as string,
+                    clientId: clientId as string
+                } ).then( () => {
+                    console.log( `Introspection completed!!\n\tThanks for using scalars client!\n\tOn your code you need to create an instance of the client like this:\n\t\tconst client = new ScalarsClient()\n\tHappy codding!!\n\tYour friendly neighbors Luis Danilo JG and Madrov team ❤️` )
+                } )
             } else {
                 console.log( 'No se hace introspección porque tu mama no es gay' )
             }
@@ -52,12 +57,6 @@ const sync = () => {
         .catch( ( error ) => {
             console.log( error )
         } )
-    introspect( {
-        endpoint: endpoint as string,
-        clientId: clientId as string
-    } ).then( () => {
-        console.log( `Introspection completed!!\n\tThanks for using scalars client!\n\tOn your code you need to create an instance of the client like this:\n\t\tconst client = new ScalarsClient()\n\tHappy codding!!\n\tYour friendly neighbors Luis Danilo JG and Madrov team ❤️` )
-    } )
 }
 
 export const argv = usage( '$0 command' )
