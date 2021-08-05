@@ -12,51 +12,57 @@ let clientId: string | null = process.env.SCALARS_CLIENT_ID || null
  * Function that starts introspection
  */
 const sync = () => {
-    inquirer
-        .prompt( [
-            {
-                type: 'confirm',
-                name: 'urMomGay',
-                message: 'Responde con algo...',
-                // default: 'y',
-                choices: [
-                    {
-                        name: 'Yes',
-                        value: 'y',
-                        short: 'Yeah!'
-                    },
-                    {
-                        name: 'Nope',
-                        value: 'n',
-                        short: 'Of course no'
-                    }
-                ],
-                validate: ( input ) => {
-                    if ( input === 'y' || input === 'n' ) {
-                        console.log( 'Respondiste acertadamente ' )
-                        return true
-                    }
-                    else {
-                        return 'No es una opción válida'
-                    }
-                }
-            }
-        ] )
-        .then( ( answers ) => {
-            if ( answers['urMomGay'] ) {
-                introspect( {
-                    endpoint: endpoint as string,
-                    clientId: clientId as string
-                } ).then( () => {
-                    console.log( `Introspection completed!!\n\tThanks for using scalars client!\n\tOn your code you need to create an instance of the client like this:\n\t\tconst client = new ScalarsClient()\n\tHappy codding!!\n\tYour friendly neighbors Luis Danilo JG and Madrov team ❤️` )
-                } )
-            } else {
-                console.log( 'No se hace introspección porque tu mama no es gay' )
-            }
-        } )
-        .catch( ( error ) => {
-            console.log( error )
-        } )
+    introspect( {
+        endpoint: endpoint as string,
+        clientId: clientId as string
+    } ).then( () => {
+        console.log( `Introspection completed!!\n\tThanks for using scalars client!\n\tOn your code you need to create an instance of the client like this:\n\t\tconst client = new ScalarsClient()\n\tHappy codding!!\n\tYour friendly neighbors Luis Danilo JG and Madrov team ❤️` )
+    } )
+    // inquirer
+    //     .prompt( [
+    //         {
+    //             type: 'confirm',
+    //             name: 'urMomGay',
+    //             message: 'Responde con algo...',
+    //             // default: 'y',
+    //             choices: [
+    //                 {
+    //                     name: 'Yes',
+    //                     value: 'y',
+    //                     short: 'Yeah!'
+    //                 },
+    //                 {
+    //                     name: 'Nope',
+    //                     value: 'n',
+    //                     short: 'Of course no'
+    //                 }
+    //             ],
+    //             validate: ( input ) => {
+    //                 if ( input === 'y' || input === 'n' ) {
+    //                     console.log( 'Respondiste acertadamente ' )
+    //                     return true
+    //                 }
+    //                 else {
+    //                     return 'No es una opción válida'
+    //                 }
+    //             }
+    //         }
+    //     ] )
+    //     .then( ( answers ) => {
+    //         if ( answers['urMomGay'] ) {
+    //             introspect( {
+    //                 endpoint: endpoint as string,
+    //                 clientId: clientId as string
+    //             } ).then( () => {
+    //                 console.log( `Introspection completed!!\n\tThanks for using scalars client!\n\tOn your code you need to create an instance of the client like this:\n\t\tconst client = new ScalarsClient()\n\tHappy codding!!\n\tYour friendly neighbors Luis Danilo JG and Madrov team ❤️` )
+    //             } )
+    //         } else {
+    //             console.log( 'No se hace introspección porque tu mama no es gay' )
+    //         }
+    //     } )
+    //     .catch( ( error ) => {
+    //         console.log( error )
+    //     } )
 }
 
 export const argv = usage( '$0 command' )
