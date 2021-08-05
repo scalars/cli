@@ -45,7 +45,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
     ).toString()
     const schemaTypes = await generateTypedSchema( config.endpoint )
     writeFileSync(
-        join( __dirname, 'index.ts' ),
+        join( config.clientPath, 'ScalarsClient.ts' ),
         render( template, {
             operations,
             schemaTypes: schemaTypes,
@@ -55,7 +55,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         } )
     )
     try {
-        compile( [join( __dirname, 'index.ts' )], {
+        compile( [join( config.clientPath, 'ScalarsClient.ts' )], {
             declaration: true,
             emitDeclarationOnly: false,
             target: 'es2019',
@@ -65,7 +65,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             esModuleInterop: true,
             skipLibCheck: true,
             forceConsistentCasingInFileNames: true,
-            outDir: __dirname,
+            outDir: config.clientPath,
         } )
     }
     catch ( e ) {

@@ -8,9 +8,7 @@
   "scripts": {
     "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && cp src/utils/template.mustache dist/template.mustache",
     "test": "yarn build && node dist/sync.js && jest --detectOpenHandles --forceExit --testTimeout=540000",
-    "jest": "jest --testTimeout=540000 --runInBand",
-    "testo": "node dist/sync.js sync",
-    "postinstall": "yarn run testo"
+    "jest": "jest --testTimeout=540000 --runInBand"
   },
   "files": [
     "dist"
@@ -54,6 +52,7 @@
     "dotenv": "^10.0.0",
     "graphql": "^15.5.1",
     "inquirer": "^8.1.2",
+    "inquirer-fuzzy-path": "^2.3.0",
     "mustache": "^4.2.0",
     "node-fetch": "^2.6.1",
     "react": "^17.0.2",
