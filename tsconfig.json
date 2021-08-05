@@ -12,7 +12,6 @@
     "declarationDir": "./dist/dts",
     "emitDeclarationOnly": true,
     "rootDir": "src",
-    "typeRoots": ["./"]
   },
   "include": ["./src/**/*.ts"],
   "exclude": [".dist/**/*.ts", "./src/__test__/**/*"]

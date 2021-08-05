@@ -3,8 +3,7 @@ import { config } from 'dotenv'
 import { join } from 'path'
 import { usage } from 'yargs'
 import inquirer from 'inquirer'
-import fuzzyPath from 'inquirer-fuzzy-path'
-
+import * as fuzzyPath from 'inquirer-fuzzy-path'
 // Inquirer setup
 inquirer.registerPrompt( 'path', fuzzyPath )
 
