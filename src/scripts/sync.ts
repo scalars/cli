@@ -22,7 +22,7 @@ const sync = () => {
         clientId: clientId as string,
         clientPath
     } ).then( () => {
-        console.log( `Introspection completed!!\n\tThanks for using scalars client!\n\tOn your code you need to create an instance of the client like this:\n\t\tconst client = new ScalarsClient()\n\tHappy codding!!\n\tYour friendly neighbors Luis Danilo JG and Madrov team ❤️` )
+        console.log( `Introspection completed!!\nHappy codding!!\nYour friendly neighbors Luis Danilo JG and Madrov team ❤️` )
     } )
 }
 
@@ -41,7 +41,7 @@ const confirmEnvs = ( dotenv: boolean ) => {
                 {
                     type: 'confirm',
                     name: 'envs',
-                    message: `♦♣♥♠ Are these your cards? (by card I mean your endpoint)\n\tENDPOINT=${endpoint}\n\tCLIENT_ID=${clientId}`,
+                    message: `♦♣♥♠ Are these your cards? (by cards I mean your endpoint and client id)\n\tENDPOINT=${endpoint}\n\tCLIENT_ID=${clientId}\n`,
                     when: !!endpoint && !!clientId
                 },
                 {
@@ -62,6 +62,12 @@ const confirmEnvs = ( dotenv: boolean ) => {
                     type: 'path',
                     itemType: 'directory',
                     rootPath: process.cwd(),
+                    excludePath: ( path: string ) => {
+                        const nodeModulesPath: string = join( process.cwd(), 'node_modules' )
+                        const gitPath: string = join( process.cwd(), '.git' )
+                        return path.startsWith( nodeModulesPath ) || path.startsWith( gitPath )
+                    },
+                    depthLimit: 2,
                     default: clientPath,
                     name: 'clientPath',
                     message: `Where do you want me to bury the corpse?`

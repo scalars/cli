@@ -57,7 +57,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
     try {
         compile( [join( config.clientPath, 'ScalarsClient.ts' )], {
             declaration: true,
-            emitDeclarationOnly: false,
+            emitDeclarationOnly: true,
             target: 'es2019',
             module: 'commonjs',
             moduleResolution: 'node',
