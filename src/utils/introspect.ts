@@ -1,5 +1,5 @@
 import { generate } from '@graphql-codegen/cli'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 import { render } from 'mustache'
 import { ScalarsClientConfig } from './interfaces'
@@ -46,7 +46,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
     const schemaTypes = await generateTypedSchema( config.endpoint )
     console.log( `Voy a escribir el archivo ${config.clientPath} -> ScalarsClient.ts` )
     writeFileSync(
-        join( config.clientPath, 'ScalarsClient.ts' ),
+        resolve( config.clientPath, 'ScalarsClient.ts' ),
         render( template, {
             operations,
             schemaTypes: schemaTypes,
