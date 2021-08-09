@@ -25,7 +25,7 @@ const generateTypedSchema = async ( scalarsEndpoint: string ): Promise<string> =
     const { '0': { content } } = await generate( {
         generates: {
             [join( __dirname, 'newTypes.ts' )]: {
-                schema: scalarsEndpoint.endsWith( '/' ) ? `${scalarsEndpoint}api` : `${scalarsEndpoint}/api`,
+                schema: scalarsEndpoint.endsWith( '/' ) ? `${scalarsEndpoint}api/v1` : `${scalarsEndpoint}/api/v1`,
                 plugins: ['typescript', 'typescript-operations'],
             }
         }
