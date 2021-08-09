@@ -1,5 +1,6 @@
 import { introspect } from '../utils/introspect'
 import { config } from 'dotenv'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { usage } from 'yargs'
 import inquirer from 'inquirer'
@@ -7,11 +8,13 @@ import * as fuzzyPath from 'inquirer-fuzzy-path'
 // Inquirer setup
 inquirer.registerPrompt( 'path', fuzzyPath )
 
+
+
 // Trying to set endpoint and clientId by environment variables
 
 let endpoint: string | null = process.env.SCALARS_ENDPOINT || null
 let clientId: string | null = process.env.SCALARS_CLIENT_ID || null
-let clientPath: string = join( process.cwd(), 'src', 'client' )
+let clientPath: string = process.cwd()
 
 /**
  * Function that starts introspection

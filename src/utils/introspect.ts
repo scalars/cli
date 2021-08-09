@@ -44,7 +44,6 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         join( __dirname, 'template.mustache' )
     ).toString()
     const schemaTypes = await generateTypedSchema( config.endpoint )
-    console.log( `Voy a escribir el archivo ${config.clientPath} -> ScalarsClient.ts` )
     writeFileSync(
         resolve( config.clientPath, 'ScalarsClient.ts' ),
         render( template, {
@@ -56,7 +55,6 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         } )
     )
     try {
-        console.log( `Compiling ScalarsClient.d.ts ...` )
         compile( [join( config.clientPath, 'ScalarsClient.ts' )], {
             declaration: true,
             emitDeclarationOnly: true,
@@ -71,7 +69,6 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         } )
     }
     catch ( e ) {
-        console.log( `Error creating type definitions file` )
         console.log( e )
     }
 }
