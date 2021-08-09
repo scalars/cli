@@ -135,7 +135,7 @@ class Service {
 
     constructor () {
         this.scalarsApiClientManager = new ScalarsClientManager(
-            {{#config}}'{{{endpoint}}}/api'{{/config}},
+            {{#config}}'{{{endpoint}}}/api/v1'{{/config}},
             'client_id {{#config}}{{clientId}}{{/config}}',
         )
         this.scalarsAuthClientManager = new ScalarsClientManager(

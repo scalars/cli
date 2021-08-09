@@ -307,7 +307,7 @@ const getIntrospectionFilteredByObjects = async ( scalarsEndpoint: string ): Pro
     const { '0': { content } } = await generate( {
         generates: {
             'introspection.json': {
-                schema: scalarsEndpoint.endsWith( '/' ) ? `${scalarsEndpoint}api` : `${scalarsEndpoint}/api`,
+                schema: scalarsEndpoint.endsWith( '/' ) ? `${scalarsEndpoint}api/v1` : `${scalarsEndpoint}/api/v1`,
                 plugins: ['introspection'],
                 config: {
                     minify: false,
