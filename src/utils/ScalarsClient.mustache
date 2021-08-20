@@ -4,6 +4,112 @@ import { DocumentNode } from 'graphql'
 import { ApolloClient, ApolloLink, FetchPolicy, NormalizedCacheObject, gql, InMemoryCache, HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context';
 
+// DefaultServices
+import { gql } from 'graphql-tag';
+import { ClientOptions, MutationClientOptions, Service } from './ScalarsClient'
+import { DocumentNode } from 'graphql';
+
+{{#schemaTypes}}
+    {{{.}}}
+{{/schemaTypes}}
+
+{{#selects}}
+    export type {{name}} = {
+    {{#fields}}
+        {{name}}?: {{type}}
+    {{/fields}}
+    }
+{{/selects}}
+
+const parseSelectFields = ( select: Record<string ,any> ): string => {
+    let fields: string = ''
+    Object.keys( select ).forEach( key => {
+        if ( typeof select[key] === 'boolean' ) {
+            fields = fields.concat( `${key} ` )
+        }
+        else {
+            fields = fields.concat( `${key} { ${parseSelectFields( select[key] )}} ` )
+        }
+    } )
+    return fields
+}
+
+const fillSelectedFields = ( operation: string, select: Record<string, any> ): DocumentNode => {
+   return gql`${operation.replace( '#@@', parseSelectFields( select ) )}`
+}
+
+export class QueriesService extends Service {
+    {{#operations}}
+    {{#queries}}
+        async {{operation}} ( args: {
+        select?: {{#select}}{{name}}{{/select}},
+        {{#args}}
+        {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
+        {{/args}}
+        clientOptions?: ClientOptions
+    } ): Promise<{{#return}}{{#list}}Array<{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
+        const get{{_operation}}Query: string = `
+            query get{{_operation}} (
+            {{#args}}
+                ${{name}}: {{#scalarType}}{{.}}{{/scalarType}}{{^scalarType}}{{{type}}}{{/scalarType}}{{#requiredType}}!{{/requiredType}},
+            {{/args}}
+            ) {
+                {{operation}} (
+                    {{#args}}
+                    {{name}}: ${{name}},
+                    {{/args}}
+                ) {
+                    #@@
+                }
+            }
+        `
+        const { {{operation}} } = await this.doQuery<Record<'{{operation}}', {{#return}}{{#list}}Array<{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Query{{_operation}}Args>(
+            fillSelectedFields( get{{_operation}}Query, args.select || { id: true } ),
+            Object.fromEntries( Object.entries( args ).filter( ( [ k, v ] ) =>  v !== null && k !== 'select' && k !== 'clientOptions' ) ) as Query{{_operation}}Args,
+            { ...args.clientOptions }
+        )
+        return {{operation}}
+    }
+    {{/queries}}
+    {{/operations}}
+}
+
+export class MutationsService extends Service {
+    {{#operations}}
+    {{#mutations}}
+    async {{operation}} ( args: {
+        select?: {{#select}}{{name}}{{/select}},
+        {{#args}}
+        {{name}}{{^requiredType}}?{{/requiredType}}: {{{type}}},
+        {{/args}}
+        clientOptions?: MutationClientOptions
+    } ): Promise<{{#return}}{{#list}}Array<{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}> {
+        const {{_operation}}Mutation: string = `
+            mutation {{_operation}} (
+            {{#args}}
+                ${{name}}: {{#scalarType}}{{.}}{{/scalarType}}{{^scalarType}}{{{type}}}{{/scalarType}}{{#requiredType}}!{{/requiredType}},
+            {{/args}}
+            ) {
+                {{operation}} (
+                {{#args}}
+                    {{name}}: ${{name}},
+                {{/args}}
+                ) {
+                    #@@
+                }
+            }
+            `
+            const { {{operation}} } = await this.doMutation<Record<'{{operation}}', {{#return}}{{#list}}Array<{{{type}}}{{^requiredType}} | null{{/requiredType}}>{{^requiredList}} | null {{/requiredList}}{{/list}}{{^list}}{{{type}}}{{^requiredType}} | null{{/requiredType}}{{/list}}{{/return}}>, Mutation{{_operation}}Args>(
+                fillSelectedFields( {{_operation}}Mutation, args.select || { id: true } ),
+                Object.fromEntries( Object.entries( args ).filter( ( [ k, v ] ) =>  v !== null && k !== 'select' && k !== 'clientOptions' ) ) as Mutation{{_operation}}Args,
+                { ...args.clientOptions }
+            )
+            return {{operation}}
+        }
+    {{/mutations}}
+    {{/operations}}
+}
+
 // Service
 
 interface ApolloOptions {

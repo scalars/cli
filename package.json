@@ -4,6 +4,7 @@
   "description": "Client for scalars APIs",
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
   "license": "MIT",
+  "main": "dist/index.js",
   "scripts": {
     "mkdir": "mkdir -p dist/templates",
     "copy": "yarn run mkdir && cp src/utils/ScalarsClient.mustache dist/templates/ScalarsClient.mustache && cp src/utils/DefaultServices.mustache dist/templates/DefaultServices.mustache",
