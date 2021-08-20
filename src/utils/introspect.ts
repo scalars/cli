@@ -40,9 +40,8 @@ const generateTypedSchema = async ( scalarsEndpoint: string ): Promise<string> =
  * @param config Client configuration (endpoint and client id)
  */
 const updateScalarsClient = async ( operations: Record<string, any>, config: ScalarsClientConfig ): Promise<void> => {
-    let outputPath: string = ''
-    !existsSync( config.clientPath ) && !!mkdirSync( config.clientPath, { recursive: true } )
-    outputPath = config.clientPath
+    const outputPath = join( __dirname, 'dist', 'generated' )
+    !existsSync( join( __dirname, 'dist', 'generated' ) ) && !!mkdirSync( join( __dirname, 'dist', 'generated' ), { recursive: true } )
     const canPerformSoftIntrospection: boolean = config.soft
         && existsSync( resolve( outputPath, 'ScalarsClientManager.ts' ) )
         && existsSync( resolve( outputPath, 'ScalarsClient.ts' ) )
