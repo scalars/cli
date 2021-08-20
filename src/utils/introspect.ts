@@ -58,7 +58,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             join( __dirname, 'templates', 'ScalarsClient.mustache' )
         ).toString()
         writeFileSync(
-            resolve( outputPath, 'ScalarsClient.ts' ),
+            resolve( outputPath, 'index.ts' ),
             render( scalarsClientTemplate, {} )
         )
         // -------------------------------------------------------------------------
@@ -102,9 +102,9 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
 
     // -------------------------------------------------------------------------
     try {
-        compile( [resolve( __dirname, 'ScalarsClient.ts' )], {
+        compile( [resolve( __dirname, 'index.ts' )], {
             declaration: true,
-            emitDeclarationOnly: true,
+            emitDeclarationOnly: false,
             target: 'es2019',
             module: 'commonjs',
             moduleResolution: 'node',
@@ -112,8 +112,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             esModuleInterop: true,
             skipLibCheck: true,
             forceConsistentCasingInFileNames: true,
-            // outDir: __dirname,
-            outFile: join( __dirname, 'index.d.ts' )
+            outDir: __dirname,
         } )
     }
     catch ( e ) {
