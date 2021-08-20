@@ -9,11 +9,11 @@ export class ScalarsClient {
         this.mutationsService = new MutationsService()
     }
 
-    get queries () {
+    get query () {
         return this.queriesService
     }
 
-    get mutations () {
+    get mutation () {
         return this.mutationsService
     }
 }

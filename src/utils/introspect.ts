@@ -40,22 +40,19 @@ const generateTypedSchema = async ( scalarsEndpoint: string ): Promise<string> =
  * @param config Client configuration (endpoint and client id)
  */
 const updateScalarsClient = async ( operations: Record<string, any>, config: ScalarsClientConfig ): Promise<void> => {
-    const outputPath = join( __dirname, 'generated' )
-    !existsSync( outputPath ) && !!mkdirSync( outputPath, { recursive: true } )
+    const outputPath = __dirname
+    // !existsSync( outputPath ) && !!mkdirSync( outputPath, { recursive: true } )
     const canPerformSoftIntrospection: boolean = config.soft
-        && existsSync( resolve( outputPath, 'ScalarsClientManager.ts' ) )
         && existsSync( resolve( outputPath, 'ScalarsClient.ts' ) )
-        && existsSync( resolve( outputPath, 'Service.ts' ) )
-        && existsSync( resolve( outputPath, 'index.ts' ) )
     if ( !canPerformSoftIntrospection ) {
         // -------------------------------------------------------------------------
-        const scalarsClientManagerTemplate: string = readFileSync(
-            join( __dirname, 'templates', 'ScalarsClientManager.mustache' )
-        ).toString()
-        writeFileSync(
-            resolve( outputPath, 'ScalarsClientManager.ts' ),
-            render( scalarsClientManagerTemplate, {} )
-        )
+        // const scalarsClientManagerTemplate: string = readFileSync(
+        //     join( __dirname, 'templates', 'ScalarsClientManager.mustache' )
+        // ).toString()
+        // writeFileSync(
+        //     resolve( outputPath, 'ScalarsClientManager.ts' ),
+        //     render( scalarsClientManagerTemplate, {} )
+        // )
         // -------------------------------------------------------------------------
         const scalarsClientTemplate: string = readFileSync(
             join( __dirname, 'templates', 'ScalarsClient.mustache' )
@@ -65,24 +62,24 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             render( scalarsClientTemplate, {} )
         )
         // -------------------------------------------------------------------------
-        const serviceTemplate: string = readFileSync(
-            join( __dirname, 'templates', 'Service.mustache' )
-        ).toString()
-        writeFileSync(
-            resolve( outputPath, 'Service.ts' ),
-            render( serviceTemplate, {} )
-        )
+        // const serviceTemplate: string = readFileSync(
+        //     join( __dirname, 'templates', 'Service.mustache' )
+        // ).toString()
+        // writeFileSync(
+        //     resolve( outputPath, 'Service.ts' ),
+        //     render( serviceTemplate, {} )
+        // )
         // -------------------------------------------------------------------------
-        writeFileSync(
-            resolve( outputPath, 'index.ts' ),
-            `export * from './Service';\nexport * from './ScalarsClientManager';\nexport * from './ScalarsClient';\nexport * from './DefaultServices';
-        `
-        )
+        // writeFileSync(
+        //     resolve( outputPath, 'index.ts' ),
+        //     `export * from './Service';\nexport * from './ScalarsClientManager';\nexport * from './ScalarsClient';\nexport * from './DefaultServices';
+        // `
+        // )
         // -------------------------------------------------------------------------
-        writeFileSync(
-            resolve( __dirname, 'index.ts' ),
-            `export * from './generated'`
-        )
+        // writeFileSync(
+        //     resolve( __dirname, 'index.ts' ),
+        //     `export * from './generated'`
+        // )
     } else {
         console.log( `Doing soft introspection!` )
     }
@@ -105,9 +102,9 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
 
     // -------------------------------------------------------------------------
     try {
-        compile( [resolve( __dirname, 'index.ts' )], {
+        compile( [resolve( __dirname, 'ScalarsClient.ts' )], {
             declaration: true,
-            emitDeclarationOnly: false,
+            emitDeclarationOnly: true,
             target: 'es2019',
             module: 'commonjs',
             moduleResolution: 'node',
@@ -115,7 +112,8 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             esModuleInterop: true,
             skipLibCheck: true,
             forceConsistentCasingInFileNames: true,
-            outDir: __dirname,
+            // outDir: __dirname,
+            outFile: join( __dirname, 'index.d.ts' )
         } )
     }
     catch ( e ) {

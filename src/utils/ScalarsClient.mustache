@@ -1,8 +1,163 @@
 import { exec } from 'child_process'
-import { ClientOptions, MutationClientOptions, Service } from './Service'
-import { gql } from '@apollo/client'
-import { TokenFunction } from './ScalarsClientManager'
 import { MutationsService, QueriesService } from './DefaultServices'
+import { DocumentNode } from 'graphql'
+import { ApolloClient, ApolloLink, FetchPolicy, NormalizedCacheObject, gql, InMemoryCache, HttpLink } from '@apollo/client'
+import { setContext } from '@apollo/client/link/context';
+
+// Service
+
+interface ApolloOptions {
+    fetchPolicy?: FetchPolicy
+}
+
+export enum ClientType {
+    CLIENT = 'explicit', // THIS WILL REPLACE IMPLICIT
+    COOKIE = 'cookie', // THIS WILL REPLACE CODE
+}
+
+export interface ClientOptions {
+    client?: ClientType
+    apolloOptions?: ApolloOptions
+}
+
+interface MutationApolloOptions {
+    fetchPolicy?: Extract<FetchPolicy, 'no-cache'>
+}
+
+export interface MutationClientOptions {
+    client?: ClientType
+    auth?: boolean
+    apolloOptions?: MutationApolloOptions
+}
+
+export class Service {
+    private readonly scalarsApiClientManager: ScalarsClientManager
+
+    constructor ( config: ScalarsClientConfig ) {
+        this.scalarsApiClientManager = new ScalarsClientManager(
+            `${process.env.SCALARS_ENDPOINT}/api/v1`,
+            config.authorization
+        )
+    }
+
+    async doQuery<T, U> (
+        query: DocumentNode,
+        variables?: U,
+        clientOptions?: ClientOptions
+    ): Promise<T> {
+        const client: ApolloClient<NormalizedCacheObject> = this.scalarsApiClientManager.getClient( clientOptions?.client )
+        try {
+            const response = await client.query( {
+                fetchPolicy: 'network-only',
+                query,
+                variables,
+                ...clientOptions?.apolloOptions
+            } )
+            return Service.getResponse<T>( response as any )
+        }
+        catch ( error ) {
+            return Service.getResponse<T>( { error } as any );
+        }
+    }
+
+    async doMutation<T, U> (
+       mutation: DocumentNode,
+        variables?: U,
+        clientOptions?: MutationClientOptions
+    ): Promise<T> {
+        const client: ApolloClient<NormalizedCacheObject> = this.scalarsApiClientManager.getClient( clientOptions?.client )
+        try {
+            const response = await client.mutate( {
+                mutation,
+                variables,
+                ...clientOptions?.apolloOptions
+            } )
+            return Service.getResponse<T>( response as any )
+        }
+        catch ( error ) {
+            return Service.getResponse<T>( { error } as any );
+        }
+    }
+
+    private static getResponse<T> ( { data, error }: { data: T, error: T } ): T {
+        if ( data ) {
+            return data;
+        }
+        throw error;
+    }
+}
+
+// ScalarsClientManager
+
+export type TokenFunction = ()=> string
+export type FetchFunction = ( uri: string, options: any )=> Promise<any>
+
+type ApolloClients = {
+    [key in ClientType]: {
+        client: ApolloClient<NormalizedCacheObject>|null
+        fetch?: FetchFunction
+        credentials?: string
+        token?: string
+    }
+}
+
+export class ScalarsClientManager {
+    private readonly apolloClients: ApolloClients
+    private readonly defaultClientType: ClientType
+    private readonly cache: InMemoryCache
+    private readonly uri: string
+
+    constructor ( uri: string, getToken: TokenFunction, defaultClientType: ClientType = ClientType.COOKIE ) {
+        if ( !uri ) {
+            throw new Error( 'URI is empty' )
+        }
+        this.defaultClientType = defaultClientType;
+        this.uri = uri;
+        this.cache = new InMemoryCache( { addTypename: false } )
+        this.apolloClients = {
+            [ClientType.CLIENT]: {
+                client: null,
+                credentials: 'omit',
+                token: getToken()
+            },
+            [ClientType.COOKIE]: {
+                client: null,
+                credentials: 'include'
+            }
+        }
+    }
+
+    getClient ( name: ClientType = this.defaultClientType, ssrMode: boolean = false ): ApolloClient<NormalizedCacheObject> {
+        const apolloClient = this.apolloClients[name]
+        if ( apolloClient && !apolloClient.client) {
+            const { credentials, token } = apolloClient
+            let authLink: ApolloLink | undefined;
+            if ( token ) {
+                authLink = setContext( ( _, { headers } ) => {
+                    return {
+                        headers: { ...headers, Authorization: token }
+                    }
+                } )
+            }
+            const httpLink = new HttpLink( {
+                uri: this.uri,
+                credentials,
+                fetch: fetch as any,
+                fetchOptions: {
+                    credentials
+                }
+            } )
+            apolloClient.client = new ApolloClient<NormalizedCacheObject>( {
+                link: authLink ? authLink.concat( httpLink ) : httpLink,
+                cache: this.cache,
+                ssrMode
+            } )
+        }
+        return apolloClient.client as ApolloClient<NormalizedCacheObject>
+    }
+}
+
+// ScalarsClient
 
 export interface ScalarsClientConfig {
     endpoint: string
@@ -34,7 +189,10 @@ export class ScalarsClient {
         this.mutationsService = new MutationsService( config )
         this.genericService = new Service( config )
         if ( shouldIntrospect.next().value ) {
-            exec( `yarn scalars sync -e ${config.endpoint} -a ${config.authorization}` )
+            console.log( `Auto introspection doing RIGHT NOW! OMG im scared, it will fail? ` )
+            exec( `yarn scalars sync -e ${config.endpoint} -a ${config.authorization} -s` )
+        } else {
+            console.log( `Auto introspection delayed` )
         }
     }
 

@@ -1,10 +1,10 @@
-abstract class Service {
+class Service {
 }
 
 export class QueriesService extends Service {
-    getAnswer ( where: Record<string, any>, ) {
-        console.log( 'ho' )
-    }
+    // getAnswer ( where: Record<string, any>, ) {
+    //     console.log( 'ho' )
+    // }
     // getAnswers () {
     // }
     // getAppclient () {
