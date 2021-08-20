@@ -212,3 +212,5 @@ export class ScalarsClient {
         return await this.genericService.doMutation<Record<string, any >, Record<string, any>>( gql`${mutation}`, variables, clientOptions )
     }
 }
+
+export * from './DefaultServices'
