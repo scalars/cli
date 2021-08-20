@@ -3,19 +3,19 @@ import { join, resolve } from 'path'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { render } from 'mustache'
 import { ScalarsClientConfig } from './interfaces'
-// import tsc, { TsConfigCompilerOptions } from 'tsc-prog'
+import tsc, { TsConfigCompilerOptions } from 'tsc-prog'
 
 const selectTypes: Array<Record<string, any>> = []
 const returnTypes: Array<Record<string, any>> = []
 
-// const compile = ( fileNames: Array<string>, options: TsConfigCompilerOptions ): void => {
-//     tsc.build( {
-//         basePath: __dirname,
-//         compilerOptions: options,
-//         include: fileNames,
-//         exclude: []
-//     } )
-// }
+const compile = ( fileNames: Array<string>, options: TsConfigCompilerOptions ): void => {
+    tsc.build( {
+        basePath: __dirname,
+        compilerOptions: options,
+        include: fileNames,
+        exclude: []
+    } )
+}
 
 /**
  * This function generates types by introspecting the API
@@ -104,23 +104,23 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-    // try {
-    //     compile( [join( config.clientPath, 'ScalarsClient.ts' )], {
-    //         declaration: true,
-    //         emitDeclarationOnly: true,
-    //         target: 'es2019',
-    //         module: 'commonjs',
-    //         moduleResolution: 'node',
-    //         strict: true,
-    //         esModuleInterop: true,
-    //         skipLibCheck: true,
-    //         forceConsistentCasingInFileNames: true,
-    //         outDir: config.clientPath,
-    //     } )
-    // }
-    // catch ( e ) {
-    //     console.log( e )
-    // }
+    try {
+        compile( [resolve( __dirname, 'index.ts' )], {
+            declaration: true,
+            emitDeclarationOnly: false,
+            target: 'es2019',
+            module: 'commonjs',
+            moduleResolution: 'node',
+            strict: true,
+            esModuleInterop: true,
+            skipLibCheck: true,
+            forceConsistentCasingInFileNames: true,
+            outDir: __dirname,
+        } )
+    }
+    catch ( e ) {
+        console.log( e )
+    }
 }
 
 /**
