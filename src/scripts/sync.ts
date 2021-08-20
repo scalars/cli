@@ -39,7 +39,7 @@ const loadEnvsAndIntrospect = ( interactive: boolean, endpoint: string | null, a
     // authorization final a usar, un string "client_id xxxxxx" oo un string jwt
     let currentAuthorization: string | null = authorization
     // Para cuando el menu esta habilitado, ruta por defecto en donde se exporta ScalarsClient.ts
-    let clientPath: string = join( process.cwd() )
+    let clientPath: string = __dirname
     // Bandera para errores varios
     const { error, parsed } = config( { path: join( process.cwd(), `${prod ? '.env.prod' : '.env.dev'}` ) } )
     if ( !error && parsed ) {
@@ -56,7 +56,7 @@ const loadEnvsAndIntrospect = ( interactive: boolean, endpoint: string | null, a
             // endpoint and auth already configured, supplied through command line options
             console.info( `Introspection with endpoint ${currentEndpoint}` )
             console.info( `Using client id ${currentAuthorization}` )
-            sync( currentEndpoint as string, currentAuthorization as string, clientPath, soft )
+            sync( currentEndpoint as string, currentAuthorization as string, __dirname, soft )
         } else {
             console.info( 'DOTENV ERROR: Environment variables loaded, but SCALARS_ENDPOINT or SCALARS_CLIENT_ID were not found' )
             return
