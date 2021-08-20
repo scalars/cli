@@ -1,6 +1,6 @@
 import { generate } from '@graphql-codegen/cli'
 import { join, resolve } from 'path'
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { render } from 'mustache'
 import { ScalarsClientConfig } from './interfaces'
 import tsc, { TsConfigCompilerOptions } from 'tsc-prog'
@@ -40,13 +40,61 @@ const generateTypedSchema = async ( scalarsEndpoint: string ): Promise<string> =
  * @param config Client configuration (endpoint and client id)
  */
 const updateScalarsClient = async ( operations: Record<string, any>, config: ScalarsClientConfig ): Promise<void> => {
-    const template: string = readFileSync(
-        join( __dirname, 'template.mustache' )
-    ).toString()
+    let outputPath: string = ''
+    !existsSync( config.clientPath ) && !!mkdirSync( config.clientPath, { recursive: true } )
+    outputPath = config.clientPath
+    const canPerformSoftIntrospection: boolean = config.soft
+        && existsSync( resolve( outputPath, 'ScalarsClientManager.ts' ) )
+        && existsSync( resolve( outputPath, 'ScalarsClient.ts' ) )
+        && existsSync( resolve( outputPath, 'Service.ts' ) )
+        && existsSync( resolve( outputPath, 'index.ts' ) )
+    if ( !canPerformSoftIntrospection ) {
+        // -------------------------------------------------------------------------
+        const scalarsClientManagerTemplate: string = readFileSync(
+            join( __dirname, 'templates', 'ScalarsClientManager.mustache' )
+        ).toString()
+        writeFileSync(
+            resolve( outputPath, 'ScalarsClientManager.ts' ),
+            render( scalarsClientManagerTemplate, {} )
+        )
+        // -------------------------------------------------------------------------
+        const scalarsClientTemplate: string = readFileSync(
+            join( __dirname, 'templates', 'ScalarsClient.mustache' )
+        ).toString()
+        writeFileSync(
+            resolve( outputPath, 'ScalarsClient.ts' ),
+            render( scalarsClientTemplate, {} )
+        )
+        // -------------------------------------------------------------------------
+        const serviceTemplate: string = readFileSync(
+            join( __dirname, 'templates', 'Service.mustache' )
+        ).toString()
+        writeFileSync(
+            resolve( outputPath, 'Service.ts' ),
+            render( serviceTemplate, {} )
+        )
+        // -------------------------------------------------------------------------
+        writeFileSync(
+            resolve( outputPath, 'index.ts' ),
+            `export * from './Service';\nexport * from './ScalarsClientManager';\nexport * from './ScalarsClient';\nexport * from './DefaultServices';
+        `
+        )
+        // -------------------------------------------------------------------------
+        writeFileSync(
+            resolve( __dirname, 'index.ts' ),
+            `export * from './generated`
+        )
+    } else {
+        console.log( `Doing soft introspection!` )
+    }
+    // -------------------------------------------------------------------------
     const schemaTypes = await generateTypedSchema( config.endpoint )
+    const defaultServicesTemplate: string = readFileSync(
+        join( __dirname, 'templates', 'DefaultServices.mustache' )
+    ).toString()
     writeFileSync(
-        resolve( config.clientPath, 'ScalarsClient.ts' ),
-        render( template, {
+        resolve( outputPath, 'DefaultServices.ts' ),
+        render( defaultServicesTemplate, {
             operations,
             schemaTypes: schemaTypes,
             selects: selectTypes,
@@ -54,23 +102,26 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             config
         } )
     )
-    try {
-        compile( [join( config.clientPath, 'ScalarsClient.ts' )], {
-            declaration: true,
-            emitDeclarationOnly: true,
-            target: 'es2019',
-            module: 'commonjs',
-            moduleResolution: 'node',
-            strict: true,
-            esModuleInterop: true,
-            skipLibCheck: true,
-            forceConsistentCasingInFileNames: true,
-            outDir: config.clientPath,
-        } )
-    }
-    catch ( e ) {
-        console.log( e )
-    }
+    // -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
+    // try {
+    //     compile( [join( config.clientPath, 'ScalarsClient.ts' )], {
+    //         declaration: true,
+    //         emitDeclarationOnly: true,
+    //         target: 'es2019',
+    //         module: 'commonjs',
+    //         moduleResolution: 'node',
+    //         strict: true,
+    //         esModuleInterop: true,
+    //         skipLibCheck: true,
+    //         forceConsistentCasingInFileNames: true,
+    //         outDir: config.clientPath,
+    //     } )
+    // }
+    // catch ( e ) {
+    //     console.log( e )
+    // }
 }
 
 /**

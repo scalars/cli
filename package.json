@@ -6,7 +6,9 @@
   "author": "LuisDanilo <luis.danilo.95@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && cp src/utils/template.mustache dist/template.mustache",
+    "mkdir": "mkdir -p dist/templates",
+    "copy": "yarn run mkdir && cp src/utils/ScalarsClient.mustache dist/templates/ScalarsClient.mustache && cp src/utils/ScalarsClientManager.mustache dist/templates/ScalarsClientManager.mustache && cp src/utils/Service.mustache dist/templates/Service.mustache && cp src/utils/DefaultServices.mustache dist/templates/DefaultServices.mustache",
+    "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && yarn run copy",
     "test": "yarn build && node dist/sync.js && jest --detectOpenHandles --forceExit --testTimeout=540000",
     "jest": "jest --testTimeout=540000 --runInBand"
   },
@@ -57,6 +59,7 @@
     "node-fetch": "^2.6.1",
     "react": "^17.0.2",
     "tsc-prog": "^2.2.1",
-    "yargs": "^17.0.1"
+    "yargs": "^17.0.1",
+    "graphql-tag": "^2.12.5"
   }
 }

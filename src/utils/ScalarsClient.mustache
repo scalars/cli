@@ -1,0 +1,56 @@
+import { exec } from 'child_process'
+import { ClientOptions, MutationClientOptions, Service } from './Service'
+import { gql } from '@apollo/client'
+import { TokenFunction } from './ScalarsClientManager'
+import { MutationsService, QueriesService } from './DefaultServices'
+
+export interface ScalarsClientConfig {
+    endpoint: string
+    authorization: TokenFunction
+}
+
+function* gen ( max: number = 10 ) {
+    let c: number = 1
+    while( true ) {
+        if ( c < max ) {
+            c = c + 1
+            yield false
+        } else {
+            c = 1
+            yield true
+        }
+    }
+}
+
+const shouldIntrospect = gen()
+
+export class ScalarsClient {
+    private readonly queriesService: QueriesService
+    private readonly mutationsService: MutationsService
+    private readonly genericService: Service
+
+    constructor( config: ScalarsClientConfig ) {
+        this.queriesService = new QueriesService( config )
+        this.mutationsService = new MutationsService( config )
+        this.genericService = new Service( config )
+        if ( shouldIntrospect.next().value ) {
+            exec( `yarn scalars sync -e ${config.endpoint} -a ${config.authorization}` )
+        }
+    }
+
+    get query () {
+        return this.queriesService
+    }
+
+    get mutation () {
+        return this.mutationsService
+    }
+
+    async doQuery ( query: string, variables: Record<string, any>, clientOptions?: ClientOptions ): Promise<Record<string, any>> {
+        return await this.genericService.doQuery<Record<string, any >, Record<string, any>>( gql`${query}`, variables, clientOptions )
+    }
+
+    async doMutation ( mutation: string, variables: Record<string, any>, clientOptions?: MutationClientOptions ): Promise<Record<string, any>> {
+        return await this.genericService.doMutation<Record<string, any >, Record<string, any>>( gql`${mutation}`, variables, clientOptions )
+    }
+}

@@ -5,12 +5,19 @@ import fetch from 'node-fetch';
 import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, NormalizedCacheObject, FetchPolicy, gql } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 
-export enum ClientType {
-    IMPLICIT = 'implicit',
-    CODE = 'code'
+type TokenFunction = ()=> string
+
+export interface ScalarsClientConfig {
+    endpoint: string,
+    getToken: TokenFunction
 }
 
-type FetchFunction = ( uri: string, options: any ) => Promise<any>
+export enum ClientType {
+    CLIENT_ID = 'explicit', // THIS WILL REPLACE IMPLICIT
+    COOKIE = 'cookie', // THIS WILL REPLACE CODE
+}
+
+type FetchFunction = ( uri: string, options: any )=> Promise<any>
 type ApolloClients = {
     [key in ClientType]: {
         client: ApolloClient<NormalizedCacheObject>|null
@@ -73,127 +80,6 @@ const fillSelectedFields = ( operation: string, select: Record<string, any> ): D
     return gql`${operation.replace( '#@@', parseSelectFields( select ) )}`
 }
 
-class ScalarsClientManager {
-    private readonly apolloClients: ApolloClients
-    private readonly defaultClientType: ClientType
-    private readonly cache: InMemoryCache
-    private readonly uri: string
-
-    constructor ( uri: string, token: string, defaultClientType: ClientType = ClientType.IMPLICIT ) {
-        if ( !uri ) {
-            throw new Error( 'URI is empty' )
-        }
-        this.defaultClientType = defaultClientType;
-        this.uri = uri;
-        this.cache = new InMemoryCache( { addTypename: false } )
-        this.apolloClients = {
-            [ClientType.IMPLICIT]: {
-                client: null,
-                credentials: 'omit',
-                token
-            },
-            [ClientType.CODE]: {
-                client: null,
-                credentials: 'include'
-            }
-        }
-    }
-
-    getClient ( name: ClientType = this.defaultClientType, ssrMode: boolean = false ): ApolloClient<NormalizedCacheObject> {
-        const apolloClient = this.apolloClients[name]
-        if ( apolloClient && !apolloClient.client) {
-            const { credentials, token } = apolloClient
-            let authLink: ApolloLink | undefined;
-            if ( token ) {
-                authLink = setContext( ( _, { headers } ) => {
-                    return {
-                        headers: { ...headers, Authorization: token }
-                    }
-                } )
-            }
-            const httpLink = new HttpLink( {
-                uri: this.uri,
-                credentials,
-                fetch: fetch as any,
-                fetchOptions: {
-                    credentials
-                }
-            } )
-            apolloClient.client = new ApolloClient<NormalizedCacheObject>( {
-                link: authLink ? authLink.concat( httpLink ) : httpLink,
-                cache: this.cache,
-                ssrMode
-            } )
-        }
-        return apolloClient.client as ApolloClient<NormalizedCacheObject>
-    }
-}
-
-class Service {
-    private readonly scalarsApiClientManager: ScalarsClientManager
-    private readonly scalarsAuthClientManager: ScalarsClientManager
-
-    constructor () {
-        this.scalarsApiClientManager = new ScalarsClientManager(
-            {{#config}}'{{{endpoint}}}/api/v1'{{/config}},
-            'client_id {{#config}}{{clientId}}{{/config}}',
-        )
-        this.scalarsAuthClientManager = new ScalarsClientManager(
-            {{#config}}'{{{endpoint}}}/api/auth/users'{{/config}},
-            'client_id {{#config}}{{clientId}}{{/config}}',
-        )
-    }
-
-    async doQuery<T, U> (
-        query: DocumentNode,
-        variables?: U,
-        clientOptions?: ClientOptions
-    ): Promise<T> {
-        const client: ApolloClient<NormalizedCacheObject> = clientOptions?.auth
-            ? this.scalarsAuthClientManager.getClient( clientOptions?.client )
-            : this.scalarsApiClientManager.getClient( clientOptions?.client )
-        try {
-            const response = await client.query( {
-                fetchPolicy: 'network-only',
-                query,
-                variables,
-                ...clientOptions?.apolloOptions
-            } )
-            return Service.getResponse<T>( response as any )
-        }
-        catch ( error ) {
-            return Service.getResponse<T>( { error } as any );
-        }
-    }
-
-    async doMutation<T, U> (
-        mutation: DocumentNode,
-        variables?: U,
-        clientOptions?: MutationClientOptions
-    ): Promise<T> {
-        const client: ApolloClient<NormalizedCacheObject> = clientOptions?.auth
-            ? this.scalarsAuthClientManager.getClient( clientOptions?.client )
-            : this.scalarsApiClientManager.getClient( clientOptions?.client )
-        try {
-            const response = await client.mutate( {
-                mutation,
-                variables,
-                ...clientOptions?.apolloOptions
-            } )
-            return Service.getResponse<T>( response as any )
-        }
-        catch ( error ) {
-            return Service.getResponse<T>( { error } as any );
-        }
-    }
-
-    private static getResponse<T> ( { data, error }: { data: T, error: T } ): T {
-        if ( data ) {
-            return data;
-        }
-        throw error;
-    }
-}
 
 class QueriesService extends Service {
     {{#operations}}
@@ -265,32 +151,4 @@ class MutationsService extends Service {
     }
     {{/mutations}}
     {{/operations}}
-}
-
-export class ScalarsClient {
-    private readonly queriesService: QueriesService
-    private readonly mutationsService: MutationsService
-    private readonly genericService: Service
-
-    constructor() {
-        this.queriesService = new QueriesService()
-        this.mutationsService = new MutationsService()
-        this.genericService = new Service()
-    }
-
-    get query () {
-        return this.queriesService
-    }
-
-    get mutation () {
-        return this.mutationsService
-    }
-
-    async doQuery ( query: string, variables: Record<string, any>, clientOptions?: ClientOptions ): Promise<Record<string, any>> {
-        return await this.genericService.doQuery<Record<string, any >, Record<string, any>>( gql`${query}`, variables, clientOptions )
-    }
-
-    async doMutation ( mutation: string, variables: Record<string, any>, clientOptions?: MutationClientOptions ): Promise<Record<string, any>> {
-        return await this.genericService.doMutation<Record<string, any >, Record<string, any>>( gql`${mutation}`, variables, clientOptions )
-    }
 }
