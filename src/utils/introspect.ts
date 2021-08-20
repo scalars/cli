@@ -40,8 +40,8 @@ const generateTypedSchema = async ( scalarsEndpoint: string ): Promise<string> =
  * @param config Client configuration (endpoint and client id)
  */
 const updateScalarsClient = async ( operations: Record<string, any>, config: ScalarsClientConfig ): Promise<void> => {
-    const outputPath = join( __dirname, 'dist', 'generated' )
-    !existsSync( join( __dirname, 'dist', 'generated' ) ) && !!mkdirSync( join( __dirname, 'dist', 'generated' ), { recursive: true } )
+    const outputPath = join( __dirname, 'generated' )
+    !existsSync( outputPath ) && !!mkdirSync( outputPath, { recursive: true } )
     const canPerformSoftIntrospection: boolean = config.soft
         && existsSync( resolve( outputPath, 'ScalarsClientManager.ts' ) )
         && existsSync( resolve( outputPath, 'ScalarsClient.ts' ) )
@@ -81,7 +81,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         // -------------------------------------------------------------------------
         writeFileSync(
             resolve( __dirname, 'index.ts' ),
-            `export * from './generated`
+            `export * from './generated'`
         )
     } else {
         console.log( `Doing soft introspection!` )
