@@ -39,7 +39,7 @@ const loadEnvsAndIntrospect = ( interactive: boolean, endpoint: string | null, a
     // authorization final a usar, un string "client_id xxxxxx" oo un string jwt
     let currentAuthorization: string | null = authorization
     // Para cuando el menu esta habilitado, ruta por defecto en donde se exporta ScalarsClient.ts
-    let clientPath: string = join( process.cwd(), 'dist', 'generated' )
+    let clientPath: string = join( process.cwd() )
     // Bandera para errores varios
     const { error, parsed } = config( { path: join( process.cwd(), `${prod ? '.env.prod' : '.env.dev'}` ) } )
     if ( !error && parsed ) {

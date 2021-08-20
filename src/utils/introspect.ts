@@ -40,8 +40,8 @@ const generateTypedSchema = async ( scalarsEndpoint: string ): Promise<string> =
  * @param config Client configuration (endpoint and client id)
  */
 const updateScalarsClient = async ( operations: Record<string, any>, config: ScalarsClientConfig ): Promise<void> => {
-    const outputPath = __dirname
-    // !existsSync( outputPath ) && !!mkdirSync( outputPath, { recursive: true } )
+    const outputPath = config.clientPath
+    !existsSync( outputPath ) && !!mkdirSync( outputPath, { recursive: true } )
     const canPerformSoftIntrospection: boolean = config.soft
         && existsSync( resolve( outputPath, 'ScalarsClient.ts' ) )
     if ( !canPerformSoftIntrospection ) {
@@ -58,7 +58,7 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
             join( __dirname, 'templates', 'ScalarsClient.mustache' )
         ).toString()
         writeFileSync(
-            resolve( outputPath, 'index.ts' ),
+            resolve( outputPath, 'ScalarsClient.ts' ),
             render( scalarsClientTemplate, {} )
         )
         // -------------------------------------------------------------------------
@@ -101,23 +101,23 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-    try {
-        compile( [resolve( __dirname, 'index.ts' )], {
-            declaration: true,
-            emitDeclarationOnly: false,
-            target: 'es2019',
-            module: 'commonjs',
-            moduleResolution: 'node',
-            strict: true,
-            esModuleInterop: true,
-            skipLibCheck: true,
-            forceConsistentCasingInFileNames: true,
-            outDir: __dirname,
-        } )
-    }
-    catch ( e ) {
-        console.log( e )
-    }
+    // try {
+    //     compile( [resolve( __dirname, 'index.ts' )], {
+    //         declaration: true,
+    //         emitDeclarationOnly: false,
+    //         target: 'es2019',
+    //         module: 'commonjs',
+    //         moduleResolution: 'node',
+    //         strict: true,
+    //         esModuleInterop: true,
+    //         skipLibCheck: true,
+    //         forceConsistentCasingInFileNames: true,
+    //         outDir: __dirname,
+    //     } )
+    // }
+    // catch ( e ) {
+    //     console.log( e )
+    // }
 }
 
 /**
