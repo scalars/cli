@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "scripts": {
     "mkdir": "mkdir -p dist/templates",
-    "copy": "yarn run mkdir && cp src/utils/ScalarsClient.mustache dist/templates/ScalarsClient.mustache && cp src/utils/DefaultServices.mustache dist/templates/DefaultServices.mustache",
+    "copy": "yarn run mkdir && cp src/utils/ScalarsClient.mustache dist/templates/ScalarsClient.mustache",
     "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && yarn run copy",
     "test": "yarn build && node dist/sync.js && jest --detectOpenHandles --forceExit --testTimeout=540000",
     "jest": "jest --testTimeout=540000 --runInBand"
