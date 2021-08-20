@@ -3,11 +3,9 @@ import { MutationsService, QueriesService } from './DefaultServices'
 import { DocumentNode } from 'graphql'
 import { ApolloClient, ApolloLink, FetchPolicy, NormalizedCacheObject, gql, InMemoryCache, HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context';
+import { gql } from 'graphql-tag';
 
 // DefaultServices
-import { gql } from 'graphql-tag';
-import { ClientOptions, MutationClientOptions, Service } from './ScalarsClient'
-import { DocumentNode } from 'graphql';
 
 {{#schemaTypes}}
     {{{.}}}
@@ -318,5 +316,3 @@ export class ScalarsClient {
         return await this.genericService.doMutation<Record<string, any >, Record<string, any>>( gql`${mutation}`, variables, clientOptions )
     }
 }
-
-export * from './DefaultServices'
