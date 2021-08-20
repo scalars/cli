@@ -3,19 +3,19 @@ import { join, resolve } from 'path'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { render } from 'mustache'
 import { ScalarsClientConfig } from './interfaces'
-import tsc, { TsConfigCompilerOptions } from 'tsc-prog'
+// import tsc, { TsConfigCompilerOptions } from 'tsc-prog'
 
 const selectTypes: Array<Record<string, any>> = []
 const returnTypes: Array<Record<string, any>> = []
 
-const compile = ( fileNames: Array<string>, options: TsConfigCompilerOptions ): void => {
-    tsc.build( {
-        basePath: __dirname,
-        compilerOptions: options,
-        include: fileNames,
-        exclude: []
-    } )
-}
+// const compile = ( fileNames: Array<string>, options: TsConfigCompilerOptions ): void => {
+//     tsc.build( {
+//         basePath: __dirname,
+//         compilerOptions: options,
+//         include: fileNames,
+//         exclude: []
+//     } )
+// }
 
 /**
  * This function generates types by introspecting the API

@@ -17,7 +17,7 @@ function* gen ( max: number = 10 ) {
             yield false
         } else {
             c = 1
-            yield true
+            yield process.env.NODE_ENV === 'development'
         }
     }
 }
