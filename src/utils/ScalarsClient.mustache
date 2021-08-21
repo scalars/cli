@@ -3,6 +3,19 @@ import { ApolloClient, ApolloLink, FetchPolicy, NormalizedCacheObject, InMemoryC
 import { setContext } from '@apollo/client/link/context'
 import { gql } from 'graphql-tag'
 import fetch from 'node-fetch'
+import { config } from 'dotenv'
+
+const prod: boolean = process.env.NODE_ENV === 'production'
+const { error, parsed } = config( { path: join( process.cwd(), `${prod ? '.env.prod' : '.env.dev'}` ) } )
+
+if ( !error && parsed && parsed.SCALARS_ENDPOINT ) {
+    // Environment variables loaded successfully
+    currentEndpoint = parsed.SCALARS_ENDPOINT as string
+    } else {
+        console.info( `ScalarsClientError: Couldn't load endpoint` )
+        return
+    }
+}
 
 // Service
 
@@ -35,7 +48,7 @@ export class Service {
 
     constructor ( config: ScalarsClientConfig ) {
         this.scalarsApiClientManager = new ScalarsClientManager(
-            `${process.env.SCALARS_ENDPOINT}/api/v1`,
+            `${currentEndpoint}/api/v1`,
             config.authorization
         )
     }
@@ -267,21 +280,6 @@ export interface ScalarsClientConfig {
     endpoint: string
     authorization: TokenFunction
 }
-
-function* gen ( max: number = 10 ) {
-    let c: number = 1
-    while( true ) {
-        if ( c < max ) {
-            c = c + 1
-            yield false
-        } else {
-            c = 1
-            yield process.env.NODE_ENV === 'development'
-        }
-    }
-}
-
-const shouldIntrospect = gen()
 
 export class ScalarsClient {
     private readonly queriesService: QueriesService
