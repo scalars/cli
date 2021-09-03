@@ -4,17 +4,17 @@ import { setContext } from '@apollo/client/link/context'
 import { gql } from 'graphql-tag'
 import fetch from 'node-fetch'
 import { config } from 'dotenv'
+import { join } from 'path'
 
-const prod: boolean = process.env.NODE_ENV === 'production'
-const { error, parsed } = config( { path: join( process.cwd(), `${prod ? '.env.prod' : '.env.dev'}` ) } )
+let currentEndpoint: string = 'wololo';
+const prod: boolean = process.env.NODE_ENV === 'production';
+const { error, parsed } = config( { path: join( process.cwd(), `${prod ? '.env.prod' : '.env.dev'}` ) } );
 
 if ( !error && parsed && parsed.SCALARS_ENDPOINT ) {
     // Environment variables loaded successfully
-    currentEndpoint = parsed.SCALARS_ENDPOINT as string
-    } else {
-        console.info( `ScalarsClientError: Couldn't load endpoint` )
-        return
-    }
+    currentEndpoint = parsed.SCALARS_ENDPOINT as string;
+} else {
+    console.info( `ScalarsClientError: Couldn't load endpoint` );
 }
 
 // Service
