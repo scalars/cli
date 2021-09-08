@@ -2,6 +2,8 @@
 yarn.lock
 yarn-error.log
 package-lock.json
+test-report.xml
+tsconfig.tsbuildinfo
 node_modules
 dist
 .env.dev

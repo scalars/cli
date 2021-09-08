@@ -2,7 +2,7 @@ import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, NormalizedCacheObjec
 import { setContext } from '@apollo/client/link/context';
 import { ClientType } from './Service';
 
-export type TokenFunction = ()=> string
+export type TokenFunction = ()=> string | string
 export type FetchFunction = ( uri: string, options: any )=> Promise<any>
 
 type ApolloClients = {

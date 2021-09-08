@@ -1,28 +1,36 @@
-import { introspect } from '../utils/introspect'
 import { config } from 'dotenv'
-import { join, resolve } from 'path'
-import yargs from 'yargs'
 import inquirer from 'inquirer'
-import * as fuzzyPath from 'inquirer-fuzzy-path'
-// Inquirer setup
+import fuzzyPath from 'inquirer-fuzzy-path'
+import { join } from 'path'
+import yargs  from 'yargs'
+
+import { introspect } from '../utils/introspect'
 inquirer.registerPrompt( 'path', fuzzyPath )
+
+const succesMessage: string = `
+Introspection success !
+    Enjoy your experience using Scalars
+    Happy codding!!
+== Madrov team️ ==
+`
 
 /**
  * Function that starts introspection
  * @param endpoint Endpoint to introspect
- * @param clientId Client id to authorize introspection
  * @param clientPath Path where ScalarsClient.ts will be generated
  * @param soft Make soft introspection
  */
-const sync = ( endpoint: string, clientId: string, clientPath: string, soft: boolean ) => {
+const sync = ( endpoint: string, clientPath: string, soft: boolean ) => {
     introspect( {
         endpoint,
-        clientId,
         clientPath,
         soft
     } ).then( () => {
-        // console.clear()
-        console.info( `Introspection success!\n\tEnjoy your experience using Scalars\n\tHappy codding!!\n== Madrov team️ ==` )
+        console.info( succesMessage )
+        process.exit( 0 )
+    } ).catch( error => {
+        console.info( error )
+        process.exit( - 1 )
     } )
 }
 
@@ -31,57 +39,39 @@ const sync = ( endpoint: string, clientId: string, clientPath: string, soft: boo
  * @param interactive Flag to enable command line menu
  * @param endpoint Endpoint recovered from command line option "-e or --endpoint".
  * @param authorization Authorization recovered from command line option "-a or --authorization".
+ * @param env
  * @param prod Flag to use .env.prod file as introspection values, otherwise .env.dev is taken by default.
+ * @param soft
  */
-const loadEnvsAndIntrospect = ( interactive: boolean, endpoint: string | null, authorization: string | null, prod: boolean, soft: boolean ) => {
-    // endpoint final a usar
+const loadEnvsAndIntrospect = (
+    interactive: boolean,
+    endpoint: string | null,
+    authorization: string | null,
+    env: string | null,
+    prod: boolean,
+    soft: boolean
+) => {
     let currentEndpoint: string | null = endpoint
-    // authorization final a usar, un string "client_id xxxxxx" oo un string jwt
-    let currentAuthorization: string | null = authorization
-    // Para cuando el menu esta habilitado, ruta por defecto en donde se exporta ScalarsClient.ts
     let clientPath: string = __dirname
-    // Bandera para errores varios
-    const { error, parsed } = config( { path: join( process.cwd(), `${prod ? '.env.prod' : '.env.dev'}` ) } )
-    if ( !error && parsed ) {
-        // Environment variables loaded successfully
-        currentEndpoint = ( endpoint || parsed.SCALARS_ENDPOINT ) as string
-        currentAuthorization = ( authorization || parsed.SCALARS_CLIENT_ID ) as string
-    } else {
-        console.info( `DOTENV ERROR: Couldn't load ${join( process.cwd(), `${prod ? '.env.prod' : '.env.dev'}` )}` )
-        return
-    }
-    if ( !interactive ) {
-        // Have to make auto introspection
-        if ( currentEndpoint && currentAuthorization ) {
-            // endpoint and auth already configured, supplied through command line options
-            console.info( `Introspection with endpoint ${currentEndpoint}` )
-            console.info( `Using client id ${currentAuthorization}` )
-            sync( currentEndpoint as string, currentAuthorization as string, __dirname, soft )
-        } else {
-            console.info( 'DOTENV ERROR: Environment variables loaded, but SCALARS_ENDPOINT or SCALARS_CLIENT_ID were not found' )
-            return
+    if ( env ) {
+        const { error, parsed } = config( { path: join( process.cwd(), `${env ? env : '.env'}` ) } )
+        if ( ! error && parsed ) {
+            currentEndpoint = parsed.SCALARS_ENDPOINT as string
         }
     } else {
-        // Have to make assisted introspection (with command line menu)
+        currentEndpoint = ( endpoint || process.env.SCALARS_ENDPOINT ) as string
+    }
+    if ( ! interactive && currentEndpoint ) {
+        console.info( `Start introspection ${currentEndpoint}` )
+        sync( currentEndpoint as string, __dirname, soft )
+    } else {
         inquirer.prompt( [
-            {
-                type: 'confirm',
-                name: 'defaultEnvs',
-                message: `\tENDPOINT=${currentEndpoint}\n\tAUTHORIZATION=${currentAuthorization}\n♦♣♥♠ Are these your cards? (loaded from ${prod ? '.env.prod' : '.env.dev'})`,
-            },
             {
                 type: 'input',
                 name: 'newEndpoint',
                 message: `What's your scalars endpoint`,
                 default: currentEndpoint,
-                when: ( answers ) => !answers.defaultEnvs
-            },
-            {
-                type: 'input',
-                name: 'newClientId',
-                message: `What's your scalars client id`,
-                default: currentAuthorization,
-                when: ( answers ) => !answers.defaultEnvs
+                when: ( answers ) => ! answers.defaultEnvs
             },
             {
                 type: 'path',
@@ -99,11 +89,10 @@ const loadEnvsAndIntrospect = ( interactive: boolean, endpoint: string | null, a
             }
         ] ).then( answers => {
             clientPath = answers.clientPath
-            if ( !answers.defaultEnvs && answers.newEndpoint && answers.newClientId ) {
+            if ( ! answers.defaultEnvs && answers.newEndpoint && answers.newClientId ) {
                 currentEndpoint = answers.newEndpoint as string
-                currentAuthorization = answers.newClientId as string
             }
-            sync( currentEndpoint as string, currentAuthorization as string, clientPath, soft )
+            sync( currentEndpoint as string, clientPath, soft )
         } )
 
     }
@@ -112,12 +101,13 @@ const loadEnvsAndIntrospect = ( interactive: boolean, endpoint: string | null, a
 yargs( process.argv.slice( 2 ) )
     .usage( `Usage: $0 <command>` )
     .command( 'sync', 'Synchronize your client', ( { argv } ) => {
-        const prod: boolean = !!argv.p
-        const interactive: boolean = !!argv.i
+        const prod: boolean = !! argv.p
+        const interactive: boolean = !! argv.i
         const endpoint: string | null = ( argv.e as string ) || null
         const authorization: string | null = ( argv.a as string ) || null
-        const soft: boolean = !!argv.s
-        loadEnvsAndIntrospect( interactive, endpoint, authorization, prod, soft )
+        const soft: boolean = !! argv.s
+        const env: string | null = argv.env as string || null
+        loadEnvsAndIntrospect( interactive, endpoint, authorization, env, prod, soft )
     } )
     .demand( 1, 'You must provide a valid scalars command' )
     .help( 'h' )
@@ -131,6 +121,11 @@ yargs( process.argv.slice( 2 ) )
     .option( 'e', { type: 'string', description: 'Make introspection with provided endpoint' } )
     .alias( 'e', 'endpoint' )
     .nargs( 'e', 1 )
+
+    .option( 'env', { type: 'string', description: 'Load enviroment file' } )
+    .alias( 'env', 'enviroment' )
+    .nargs( 'env', 1 )
+
     .option( 'a', { type: 'string', description: 'Make introspection with provided auth token' } )
     .alias( 'a', 'authorization' )
     .nargs( 'a', 1 )

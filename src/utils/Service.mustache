@@ -32,7 +32,7 @@ export class Service {
 
     constructor ( config: ScalarsClientConfig ) {
         this.scalarsApiClientManager = new ScalarsClientManager(
-            `${process.env.SCALARS_ENDPOINT}/api/v1`,
+            config.endpoint,
             config.authorization
         )
     }

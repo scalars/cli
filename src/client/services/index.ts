@@ -1,2 +1,2 @@
-export * from './QueriesService'
 export * from './MutationsService'
+export * from './QueriesService'

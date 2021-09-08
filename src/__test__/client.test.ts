@@ -1,12 +1,13 @@
-import { IFaq, IProfile, IRegistration, ProfileSelect, ScalarsClient } from '../../dist/index'
+// @ts-ignore
+import { Profile, ProfileSelect, ScalarsClient, ScalarsClientConfig } from '../../dist/index'
 import { faqSeeds, registrationSeeds } from './client.seeds'
 
-const client: ScalarsClient = new ScalarsClient()
+const client: ScalarsClient = new ScalarsClient( { endpoint: '', authorization: ''} as ScalarsClientConfig )
 
 const idRegex: RegExp = new RegExp( `[0-9a-fA-F]{16}` )
 const dateRegex: RegExp = new RegExp( `[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\\.[0-9]{3}Z` )
 const emailRegex: RegExp = new RegExp( `[a-zA-Z]+@[a-zA-Z]+.+` )
-const { objectContaining, stringContaining, anything, stringMatching, arrayContaining } = expect
+const { objectContaining, stringContaining, stringMatching, arrayContaining } = expect
 const { floor, random } = Math
 
 describe( `Registration`, () => {
@@ -18,7 +19,7 @@ describe( `Registration`, () => {
                 .registrations( {
                     select: { id: true }
                 } )
-                .then( ( res: Array<IRegistration> ) => {
+                .then( ( res: Array<any> ) => {
                     expect( res ).toEqual( arrayContaining( [objectContaining( {
                         id: stringMatching( idRegex ),
                     } )] ) )
@@ -36,7 +37,7 @@ describe( `Registration`, () => {
                     select: { email: true, name: true, createdAt: true, updatedAt: true, linkedin: true },
                     where: { id: registrationId }
                 } )
-                .then( ( res: IRegistration ) => {
+                .then( ( res: any ) => {
                     expect( res ).toEqual( objectContaining( {
                         email: stringMatching( emailRegex ),
                         name: stringContaining( '' ),
@@ -61,7 +62,7 @@ describe( `Registration`, () => {
                         linkedin: createRegistration.linkedin
                     }
                 } )
-                .then( ( res: IRegistration ) => {
+                .then( ( res: any ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringMatching( idRegex )
                     } ) )
@@ -78,7 +79,7 @@ describe( `Registration`, () => {
                     where: { id: registrationId },
                     data: { email: updateRegistration.email, name: updateRegistration.name }
                 } )
-                .then( ( res: IRegistration ) => {
+                .then( ( res: any ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringContaining( registrationId ),
                         name: stringContaining( updateRegistration.name ),
@@ -98,7 +99,7 @@ describe( `Registration`, () => {
                     select: { id: true, name: true, email: true, createdAt: true, linkedin: true, updatedAt: true },
                     where: { id: registrationId }
                 } )
-                .then( ( res: IRegistration ) => {
+                .then( ( res: any ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringContaining( registrationId ),
                         name: stringContaining( updateRegistration.name ),
@@ -123,7 +124,7 @@ describe( `Faq`, () => {
                 .faqs( {
                     select: { id: true }
                 } )
-                .then( ( res: Array<IFaq> ) => {
+                .then( ( res: Array<any> ) => {
                     expect( res ).toEqual( arrayContaining( [objectContaining( {
                         id: stringMatching( idRegex )
                     } )] ) )
@@ -141,7 +142,7 @@ describe( `Faq`, () => {
                     select: { answer: true, question: true, createdAt: true, updatedAt: true },
                     where: { id: faqId }
                 } )
-                .then( ( res: IFaq ) => {
+                .then( ( res: any ) => {
                     expect( res ).toEqual( objectContaining( {
                         answer: stringContaining( '' ),
                         question: stringContaining( '' ),
@@ -166,7 +167,7 @@ describe( `Faq`, () => {
                         answer: createFaq.answer
                     }
                 } )
-                .then ( ( res: IFaq ) => {
+                .then ( ( res: any ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringMatching( idRegex )
                     } ) )
@@ -183,7 +184,7 @@ describe( `Faq`, () => {
                     where: { id: faqId },
                     data: { question: updateFaq.question }
                 } )
-                .then( ( res: IFaq ) => {
+                .then( ( res: any ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringContaining( faqId ),
                         question: stringContaining( updateFaq.question ),
@@ -202,7 +203,7 @@ describe( `Faq`, () => {
                     select: { id: true, answer: true, question: true, createdAt: true, updatedAt: true },
                     where: { id: faqId }
                 } )
-                .then( ( res: IFaq ) => {
+                .then( ( res: any ) => {
                     expect( res ).toEqual( objectContaining( {
                         id: stringContaining( faqId ),
                         question: stringContaining( updateFaq.question ),
@@ -217,67 +218,8 @@ describe( `Faq`, () => {
     } )
 } )
 
-describe( `Answers`, () => {
-    test( `Should read answer`, ( done ) => {
-        done()
-    } )
-    test( `Should create answer`, ( done ) => {
-        done()
-    } )
-    test( `Should update answer`, ( done ) => {
-        done()
-    } )
-    test( `Should delete answer`, ( done ) => {
-        done()
-    } )
-} )
-
-describe( `Skill`, () => {
-    test( `Should read skill`, ( done )=>{
-        done()
-    } )
-    test( `Should create skill`, ( done ) => {
-        done()
-    } )
-    test( `Should update skill`, ( done ) => {
-        done()
-    } )
-    test( `Should delete skill`, ( done ) => {
-        done()
-    } )
-} )
-
-describe( `Interest`, () => {
-    test( `Should read interest`, ( done ) => {
-        done()
-    } )
-    test( `Should create interest`, ( done ) => {
-        done()
-    } )
-    test( `Should update interest`, ( done ) => {
-        done()
-    } )
-    test( `Should delete interest`, ( done ) => {
-        done()
-    } )
-} )
-
 describe( `Profile`, () => {
     test( `Should read profile`, ( done ) => {
-        // 1st
-        // client
-        //     .doQuery(
-        //         `query profile($where: ProfileWhereUniqueInput!) { profile(where: $where) { id } }`,
-        //         { where: { email: 'luis@madrov.com' } }
-        //     )
-        //     .then( ( res: Record<'profile', any> ) => {
-        //         console.log( res.profile )
-        //     } )
-        //     .catch( ( err: unknown ) => {
-        //         console.log( err )
-        //     } )
-        //     .finally( done )
-        // 2nd
         const profileSelect: ProfileSelect = {
             id: true, email: true, description: true, phone: true,
             sentConnections: {
@@ -335,185 +277,57 @@ describe( `Profile`, () => {
                 select: profileSelect,
                 where: { user: { username: '+573145463091' } }
             } )
-            .then ( ( res: Array<IProfile> ) => {
+            .then ( ( res: Array<any> ) => {
                 console.log( res )
                 done()
-                // expect( res ).toEqual( expect.objectContaining( {
-                //     id: expect.stringMatching( idRegex ),
-                //     email: expect.stringContaining( `andres` ),
-                //     description: expect.stringContaining( `Desarrollador Backend` ),
-                //     phone: null,
-                //     sentConnections: expect.arrayContaining( [expect.objectContaining( {
-                //         id: expect.stringMatching( idRegex ),
-                //         createdAt: expect.stringMatching( dateRegex ),
-                //         updatedAt: expect.stringMatching( dateRegex ),
-                //         status: expect.anything(),
-                //         sender: expect.objectContaining( {
-                //             id: expect.stringMatching( idRegex ),
-                //             email: expect.stringMatching( emailRegex ),
-                //             user: expect.objectContaining( {
-                //                 name: expect.anything(),
-                //                 id: expect.stringMatching( idRegex ),
-                //                 createdAt: expect.stringMatching( dateRegex ),
-                //             } )
-                //         } ),
-                //         receiver: expect.objectContaining( {
-                //             id: expect.stringMatching( idRegex ),
-                //             email: expect.stringMatching( emailRegex ),
-                //             user: expect.objectContaining( {
-                //                 name: expect.anything(),
-                //                 id: expect.stringMatching( idRegex ),
-                //                 createdAt: expect.stringMatching( dateRegex )
-                //             } )
-                //         } )
-                //     } )] ),
-                //     founder_projects: expect.arrayContaining( [expect.objectContaining( {
-                //         name: expect.anything(),
-                //         founders: expect.arrayContaining( [expect.objectContaining( {
-                //             email: expect.stringMatching( emailRegex )
-                //         } )] ),
-                //         requests: expect.arrayContaining( [expect.objectContaining( {
-                //             id: expect.stringMatching( idRegex ),
-                //             status: expect.anything(),
-                //             createdAt: expect.stringMatching( dateRegex ),
-                //             invitee: expect.objectContaining( {
-                //                 email: expect.stringMatching( emailRegex )
-                //             } ),
-                //             inviter: expect.objectContaining( {
-                //                 email: expect.stringMatching( emailRegex )
-                //             } ),
-                //             project: expect.objectContaining( {
-                //                 name: expect.anything()
-                //             } )
-                //         } )] )
-                //     } )] ),
-                //     // receivedConnection: expect.arrayContaining( [expect.objectContaining( {
-                //     //     id: expect.stringMatching( idRegex ),
-                //     //     createdAt: expect.stringMatching( dateRegex ),
-                //     //     updatedAt: expect.stringMatching( dateRegex ),
-                //     //     status: expect.anything(),
-                //     //     sender: expect.objectContaining( {
-                //     //         id: expect.stringMatching( idRegex ),
-                //     //         email: expect.stringMatching( emailRegex ),
-                //     //         user: expect.objectContaining( {
-                //     //             name: expect.anything(),
-                //     //             id: expect.stringMatching( idRegex ),
-                //     //             createdAt: expect.stringMatching( dateRegex ),
-                //     //         } )
-                //     //     } ),
-                //     //     receiver: expect.objectContaining( {
-                //     //         id: expect.stringMatching( idRegex ),
-                //     //         email: expect.stringMatching( emailRegex ),
-                //     //         user: expect.objectContaining( {
-                //     //             name: expect.anything(),
-                //     //             id: expect.stringMatching( idRegex ),
-                //     //             createdAt: expect.stringMatching( dateRegex )
-                //     //         } )
-                //     //     } )
-                //     // } )] )
-                // } ) )
             } )
             .catch( ( err: unknown ) => {
                 console.log( err )
             } )
     } )
-    test( `Should create profile`, ( done ) => {
-        done()
-    } )
-    test( `Should update profile`, ( done ) => {
-        done()
-    } )
-    test( `Should delete profile`, ( done ) => {
-        done()
-    } )
+    test.todo( `Should create profile`)
+    test.todo( `Should update profile`)
+    test.todo( `Should delete profile`)
 } )
 
 describe( `Chat`, () => {
-    test( `Should read chat`, ( done ) => {
-        done()
-    } )
-    test( `Should create chat`, ( done ) => {
-        done()
-    } )
-    test( `Should update chat`, ( done ) => {
-        done()
-    } )
-    test( `Should delete chat`, ( done ) => {
-        done()
-    } )
+    test.todo( `Should read chat`)
+    test.todo( `Should create chat`)
+    test.todo( `Should update chat`)
+    test.todo( `Should delete chat`)
 } )
 
 describe( `Message`, () => {
-    test( `Should read message`, ( done ) => {
-        done()
-    } )
-    test( `Should create message`, ( done ) => {
-        done()
-    } )
-    test( `Should update message`, ( done ) => {
-        done()
-    } )
-    test( `Should delete message`, ( done ) => {
-        done()
-    } )
+    test.todo( `Should read message`)
+    test.todo( `Should create message`)
+    test.todo( `Should update message`)
+    test.todo( `Should delete message`)
 } )
 
 describe( `Connection`, () => {
-    test( `Should read connection`, ( done ) => {
-        done()
-    } )
-    test( `Should create connection`, ( done ) => {
-        done()
-    } )
-    test( `Should update connection`, ( done ) => {
-        done()
-    } )
-    test( `Should delete connection`, ( done ) => {
-        done()
-    } )
+    test.todo( `Should read connection`)
+    test.todo( `Should create connection`)
+    test.todo( `Should update connection`)
+    test.todo( `Should delete connection`)
 } )
 
 describe( `Project`, () => {
-    test( `Should read project`, ( done ) => {
-        done()
-    } )
-    test( `Should create project`, ( done ) => {
-        done()
-    } )
-    test( `Should update project`, ( done ) => {
-        done()
-    } )
-    test( `Should delete project`, ( done ) => {
-        done()
-    } )
+    test.todo( `Should read project`)
+    test.todo( `Should create project`)
+    test.todo( `Should update project`)
+    test.todo( `Should delete project`)
 } )
 
 describe( `Request`, () => {
-    test( `Should read request`, ( done ) => {
-        done()
-    } )
-    test( `Should create request`, ( done ) => {
-        done()
-    } )
-    test( `Should update request`, ( done ) => {
-        done()
-    } )
-    test( `Should delete request`, ( done ) => {
-        done()
-    } )
+    test.todo( `Should read request`)
+    test.todo( `Should create request`)
+    test.todo( `Should update request`)
+    test.todo( `Should delete request`)
 } )
 
 describe( `Comment`, () => {
-    test( `Should read comment`, ( done ) => {
-        done()
-    } )
-    test( `Should create comment`, ( done ) => {
-        done()
-    } )
-    test( `Should update comment`, ( done ) => {
-        done()
-    } )
-    test( `Should delete comment`, ( done ) => {
-        done()
-    } )
+    test.todo( `Should read comment` )
+    test.todo( `Should create comment`)
+    test.todo( `Should update comment`)
+    test.todo( `Should delete comment`)
 } )

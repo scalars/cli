@@ -1,9 +1,10 @@
 import { generate } from '@graphql-codegen/cli'
-import { join, resolve } from 'path'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { render } from 'mustache'
-import { ScalarsClientConfig } from './interfaces'
+import { join, resolve } from 'path'
 import tsc, { TsConfigCompilerOptions } from 'tsc-prog'
+
+import { ScalarsClientConfig } from './interfaces'
 
 const selectTypes: Array<Record<string, any>> = []
 const returnTypes: Array<Record<string, any>> = []
@@ -26,7 +27,7 @@ const generateTypedSchema = async ( scalarsEndpoint: string ): Promise<string> =
         generates: {
             [join( __dirname, 'newTypes.ts' )]: {
                 schema: scalarsEndpoint.endsWith( '/' ) ? `${scalarsEndpoint}api/v1` : `${scalarsEndpoint}/api/v1`,
-                plugins: ['typescript', 'typescript-operations'],
+                plugins: [ 'typescript', 'typescript-operations' ],
             }
         }
     }, false )
@@ -39,51 +40,10 @@ const generateTypedSchema = async ( scalarsEndpoint: string ): Promise<string> =
  * fields that can be queried/are attached to each one.
  * @param config Client configuration (endpoint and client id)
  */
+// eslint-disable-next-line max-lines-per-function
 const updateScalarsClient = async ( operations: Record<string, any>, config: ScalarsClientConfig ): Promise<void> => {
     const outputPath = config.clientPath
-    !existsSync( outputPath ) && !!mkdirSync( outputPath, { recursive: true } )
-    // const canPerformSoftIntrospection: boolean = config.soft
-    //     && existsSync( resolve( outputPath, 'index.ts' ) )
-    // if ( !canPerformSoftIntrospection ) {
-    //     // -------------------------------------------------------------------------
-    //     // const scalarsClientManagerTemplate: string = readFileSync(
-    //     //     join( __dirname, 'templates', 'ScalarsClientManager.mustache' )
-    //     // ).toString()
-    //     // writeFileSync(
-    //     //     resolve( outputPath, 'ScalarsClientManager.ts' ),
-    //     //     render( scalarsClientManagerTemplate, {} )
-    //     // )
-    //     // -------------------------------------------------------------------------
-    //     const scalarsClientTemplate: string = readFileSync(
-    //         join( __dirname, 'templates', 'ScalarsClient.mustache' )
-    //     ).toString()
-    //     writeFileSync(
-    //         resolve( outputPath, 'index.ts' ),
-    //         render( scalarsClientTemplate, {} )
-    //     )
-    //     // -------------------------------------------------------------------------
-    //     // const serviceTemplate: string = readFileSync(
-    //     //     join( __dirname, 'templates', 'Service.mustache' )
-    //     // ).toString()
-    //     // writeFileSync(
-    //     //     resolve( outputPath, 'Service.ts' ),
-    //     //     render( serviceTemplate, {} )
-    //     // )
-    //     // -------------------------------------------------------------------------
-    //     // writeFileSync(
-    //     //     resolve( outputPath, 'index.ts' ),
-    //     //     `export * from './Service';\nexport * from './ScalarsClientManager';\nexport * from './ScalarsClient';\nexport * from './DefaultServices';
-    //     // `
-    //     // )
-    //     // -------------------------------------------------------------------------
-    //     // writeFileSync(
-    //     //     resolve( __dirname, 'index.ts' ),
-    //     //     `export * from './generated'`
-    //     // )
-    // } else {
-    //     console.log( `Doing soft introspection!` )
-    // }
-    // -------------------------------------------------------------------------
+    ! existsSync( outputPath ) && !! mkdirSync( outputPath, { recursive: true } )
     const schemaTypes = await generateTypedSchema( config.endpoint )
     const defaultServicesTemplate: string = readFileSync(
         join( __dirname, 'templates', 'ScalarsClient.mustache' )
@@ -99,11 +59,9 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
         } )
     )
     // -------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------
     if ( outputPath === __dirname ) {
         try {
-            compile( [resolve( __dirname, 'index.ts' )], {
+            compile( [ resolve( __dirname, 'index.ts' ) ], {
                 declaration: true,
                 emitDeclarationOnly: false,
                 target: 'es2019',
@@ -116,8 +74,8 @@ const updateScalarsClient = async ( operations: Record<string, any>, config: Sca
                 outDir: __dirname,
             } )
         }
-        catch ( e ) {
-            console.log( e )
+        catch ( error ) {
+            console.info( error )
         }
     }
 }
@@ -150,7 +108,7 @@ const getFieldType = ( fieldType: Record<string, any> ): Record<string, any> => 
  * This function builds types for operations responses
  * @param entity Entity to which the related queries or mutations responses will be build
  */
-const generateOperationsResponseTypes = ( entity: Record<string ,any> ): Record<string, any> => {
+const generateOperationsResponseTypes = ( entity: Record<string, any> ): Record<string, any> => {
     const selectType: Record<string, any> = {
         name: `${entity.name}Select`,
         fields: entity.fields.map( ( field: Record<string, any> ) => {
@@ -160,7 +118,7 @@ const generateOperationsResponseTypes = ( entity: Record<string ,any> ): Record<
             }
         } )
     }
-    if ( !selectTypes.some( select => select.name === selectType.name ) )
+    if ( ! selectTypes.some( select => select.name === selectType.name ) )
         selectTypes.push( selectType )
     return selectType
 }
@@ -201,7 +159,7 @@ const getOperationReturnType = ( type: Record<string, any>, required: boolean = 
  */
 const getOperationArgType = ( arg: Record<string, any>, required: boolean = false ): Record<string, any> => {
     const { type: { kind, name, ofType } } = arg
-    let result: Record<string ,any> = {}
+    let result: Record<string, any> = {}
     if ( /NON_NULL/gm.test( kind ) ) {
         result = getOperationArgType( { name: arg.name, type: ofType }, true )
     }
@@ -250,7 +208,7 @@ const getMutations = ( entity: Record<string, any>, mutations: Array<Record<stri
     mutations.forEach( ( mutation: Record<string, any> ) => {
         if ( getEntityFromOperation( mutation.type ) === entity.name ) {
             const operationReturn: Record<string, any> = getOperationReturnType( mutation.type )
-            if ( !returnTypes.some( ret => ret.type === operationReturn.type ) )
+            if ( ! returnTypes.some( ret => ret.type === operationReturn.type ) )
                 returnTypes.push( operationReturn )
             entityMutations.push( {
                 operation: mutation.name,
@@ -259,11 +217,11 @@ const getMutations = ( entity: Record<string, any>, mutations: Array<Record<stri
                 entity: entity.name,
                 args: mutation.args
                     .map( ( arg: Record<string, any> ) => getOperationArgType( arg ) )
-                    .sort( ( a: Record<string ,any>, b: Record<string ,any> ) => {
-                        if ( a.requiredType && !b.requiredType ) {
-                            return -1
+                    .sort( ( a: Record<string, any>, b: Record<string, any> ) => {
+                        if ( a.requiredType && ! b.requiredType ) {
+                            return - 1
                         }
-                        if ( b.requiredType && !a.requiredType ) {
+                        if ( b.requiredType && ! a.requiredType ) {
                             return 1
                         }
                         return 0
@@ -284,11 +242,11 @@ const getMutations = ( entity: Record<string, any>, mutations: Array<Record<stri
  */
 const getQueries = ( entity: Record<string, any>, queries: Array<Record<string, any>> ): Array<Record<string, any>> => {
     const entityQueries: Array<Record<string, any>> = []
-    const select: Record<string ,any> = generateOperationsResponseTypes( entity )
+    const select: Record<string, any> = generateOperationsResponseTypes( entity )
     queries.forEach( ( query: Record<string, any > ) => {
         if ( getEntityFromOperation( query.type ) === entity.name ) {
             const operationReturn: Record<string, any> = getOperationReturnType( query.type )
-            if ( !returnTypes.some( ret => ret.type === operationReturn.type ) )
+            if ( ! returnTypes.some( ret => ret.type === operationReturn.type ) )
                 returnTypes.push( operationReturn )
             entityQueries.push( {
                 operation: query.name,
@@ -297,11 +255,11 @@ const getQueries = ( entity: Record<string, any>, queries: Array<Record<string, 
                 entity: entity.name,
                 args: query.args
                     .map( ( arg: Record<string, any> ) => getOperationArgType( arg ) )
-                    .sort( ( a: Record<string ,any>, b: Record<string ,any> ) => {
-                        if ( a.requiredType && !b.requiredType ) {
-                            return -1
+                    .sort( ( a: Record<string, any>, b: Record<string, any> ) => {
+                        if ( a.requiredType && ! b.requiredType ) {
+                            return - 1
                         }
-                        if ( b.requiredType && !a.requiredType ) {
+                        if ( b.requiredType && ! a.requiredType ) {
                             return 1
                         }
                         return 0
@@ -327,18 +285,18 @@ const getServicesByOperations = ( objects: Array<Record<string, any>> ): Record<
     const queryObject: Record<string, any> | undefined = objects
         .filter( ( object: Record<string, any> ) =>
             /^Query$/gm.test( object.name ) &&
-            !/^.+Connection$/gm.test( object.name )
+            ! /^.+Connection$/gm.test( object.name )
         ).shift()
     const mutationObject: Record<string, any> | undefined = objects
         .filter( ( object: Record<string, any> ) =>
             /^Mutation$/gm.test( object.name ) &&
-            !/^.+Connection$/gm.test( object.name )
+            ! /^.+Connection$/gm.test( object.name )
         ).shift()
     const entitiesObjects: Array<Record<string, any>> = objects
         .filter( ( object: Record<string, any> ) =>
-            !/^Mutation$/gm.test( object.name ) &&
-            !/^Query$/gm.test( object.name ) &&
-            !/^.+Connection$/gm.test( object.name )
+            ! /^Mutation$/gm.test( object.name ) &&
+            ! /^Query$/gm.test( object.name ) &&
+            ! /^.+Connection$/gm.test( object.name )
         )
     entitiesObjects.forEach( ( entity: Record<string, any> ) => {
         operations.queries.push( ...getQueries( entity, queryObject?.fields ) )
@@ -357,7 +315,7 @@ const getIntrospectionFilteredByObjects = async ( scalarsEndpoint: string ): Pro
         generates: {
             'introspection.json': {
                 schema: scalarsEndpoint.endsWith( '/' ) ? `${scalarsEndpoint}api/v1` : `${scalarsEndpoint}/api/v1`,
-                plugins: ['introspection'],
+                plugins: [ 'introspection' ],
                 config: {
                     minify: false,
                     descriptions: true,
@@ -368,7 +326,7 @@ const getIntrospectionFilteredByObjects = async ( scalarsEndpoint: string ): Pro
     }, false )
     const { '__schema': { types } }: Record<string, any> = JSON.parse( content )
     return types
-        .filter( ( type: any ) => /^OBJECT$/gm.test( type.kind ) && !/^__.+/gm.test( type.name ) )
+        .filter( ( type: any ) => /^OBJECT$/gm.test( type.kind ) && ! /^__.+/gm.test( type.name ) )
 }
 
 /**
