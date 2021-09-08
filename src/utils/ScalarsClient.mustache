@@ -3,21 +3,6 @@ import { ApolloClient, ApolloLink, FetchPolicy, NormalizedCacheObject, InMemoryC
 import { setContext } from '@apollo/client/link/context'
 import { gql } from 'graphql-tag'
 import fetch from 'node-fetch'
-import { config } from 'dotenv'
-import { join } from 'path'
-
-let currentEndpoint: string = 'wololo';
-const prod: boolean = process.env.NODE_ENV === 'production';
-const { error, parsed } = config( { path: join( process.cwd(), `${prod ? '.env.prod' : '.env.dev'}` ) } );
-
-if ( !error && parsed && parsed.SCALARS_ENDPOINT ) {
-    // Environment variables loaded successfully
-    currentEndpoint = parsed.SCALARS_ENDPOINT as string;
-} else {
-    console.info( `ScalarsClientError: Couldn't load endpoint` );
-}
-
-// Service
 
 interface ApolloOptions {
     fetchPolicy?: FetchPolicy
@@ -48,7 +33,7 @@ export class Service {
 
     constructor ( config: ScalarsClientConfig ) {
         this.scalarsApiClientManager = new ScalarsClientManager(
-            `${currentEndpoint}/api/v1`,
+            config.endpoint,
             config.authorization
         )
     }
@@ -206,7 +191,7 @@ export class MutationsService extends Service {
 
 // ScalarsClientManager
 
-export type TokenFunction = ()=> string
+export type TokenFunction = ()=> string | string
 export type FetchFunction = ( uri: string, options: any )=> Promise<any>
 
 type ApolloClients = {
