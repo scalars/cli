@@ -1,6 +1,6 @@
 {
   "name": "@scalars/cli",
-  "version": "1.2.23",
+  "version": "1.2.237",
   "description": "Client for scalars application",
   "license": "MIT",
   "main": "dist/index.js",
@@ -9,9 +9,7 @@
     "copy": "yarn run mkdir && cp src/utils/ScalarsClient.mustache dist/templates/ScalarsClient.mustache",
     "build": "rimraf dist && tsc && rollup -c && rimraf dist/dts && yarn run copy",
     "test": "yarn build && node dist/sync.js && jest --detectOpenHandles --forceExit --testTimeout=540000",
-    "jest": "jest --testTimeout=540000 --runInBand",
-    "prepublish": "yarn build",
-    "postinstall": "yarn build"
+    "jest": "jest --testTimeout=540000 --runInBand"
   },
   "files": [
     "dist"
@@ -30,7 +28,6 @@
     "@rollup/plugin-typescript": "^8.2.1",
     "@types/inquirer": "^7.3.3",
     "@types/inquirer-fuzzy-path": "^2.3.2",
-    "@scalars/cli": "file:./dist/dts",
     "@types/jest": "^26.0.24",
     "@types/mustache": "^4.1.1",
     "@types/rollup__plugin-virtual": "^2.0.1",
@@ -46,13 +43,14 @@
     "rollup-plugin-terser": "^7.0.2",
     "ts-jest": "^27.0.3",
     "tslib": "^2.3.0",
+    "rollup": "^1.32.1",
     "typescript": "^4.3.4",
     "yargs": "^17.0.1"
   },
   "bin": {
     "scalars": "dist/sync.js"
   },
-  "repository": "https://gitlab.com/scalars/cli",
+  "repository": "https://github.com/scalars/cli",
   "dependencies": {
     "@apollo/client": "^3.3.21",
     "@graphql-codegen/cli": "^2.0.1",
