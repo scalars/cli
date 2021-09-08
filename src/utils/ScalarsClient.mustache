@@ -46,7 +46,7 @@ export class Service {
         const client: ApolloClient<NormalizedCacheObject> = this.scalarsApiClientManager.getClient( clientOptions?.client )
         try {
             const response = await client.query( {
-                fetchPolicy: 'network-only',
+                fetchPolicy: 'no-cache',
                 query,
                 variables,
                 ...clientOptions?.apolloOptions
