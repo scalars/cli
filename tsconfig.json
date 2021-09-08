@@ -10,8 +10,7 @@
     "outDir": "./dist",
     "declaration": true,
     "declarationDir": "./dist/dts",
-    "emitDeclarationOnly": true,
-    "rootDir": "src",
+    "emitDeclarationOnly": true
   },
   "include": ["./src/**/*.ts"],
   "exclude": [ ".dist/**/*.ts", "./src/__test__/**/*", "./src/tests/**/*" ]
